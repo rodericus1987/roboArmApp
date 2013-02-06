@@ -1,0 +1,97 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    tools:context=".LockAxis" >
+    
+    <ImageView
+        android:id="@+id/axis"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="35dp"
+        android:src="@drawable/white_axis_dbl" />
+
+    <CheckBox
+        android:id="@+id/lockZAxis"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_above="@id/axis"
+        android:layout_alignLeft="@id/axis"
+        android:text="@string/lock_z"
+        android:textColor="#FFFFFF" />
+
+    <CheckBox
+        android:id="@+id/lockYAxis"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_alignTop="@id/axis"
+        android:layout_toRightOf="@id/axis"
+        android:text="@string/lock_y"
+        android:textColor="#FFFFFF" />
+
+    <CheckBox
+        android:id="@+id/lockXAxis"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_alignLeft="@id/lockYAxis"
+        android:layout_centerVertical="true"
+        android:text="@string/lock_x"
+        android:textColor="#FFFFFF" />
+
+    <Button
+        android:id="@+id/doneButton"
+        android:onClick="doneButton"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="63dp"
+        android:layout_width="250dp"
+        android:layout_height="70dp"
+        android:textColor="#FFFFFF"
+        android:text="@string/done_button" />
+    
+    <ImageView
+        android:id="@+id/roll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/lockZAxis"
+        android:layout_alignLeft="@id/lockZAxis"
+        android:layout_marginBottom="40dp"
+        android:layout_marginLeft="30dp"
+        android:src="@drawable/roll_icon" />
+    
+    <CheckBox
+        android:id="@+id/lockRoll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_above="@id/roll"
+        android:layout_alignLeft="@id/lockZAxis"
+        android:text="@string/lock_roll"
+        android:textColor="#FFFFFF" />
+    
+    <ImageView
+        android:id="@+id/pitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/roll"
+        android:layout_alignRight="@id/lockYAxis"
+        android:layout_marginRight="35dp"
+        android:src="@drawable/pitch_icon" />
+    
+    <CheckBox
+        android:id="@+id/lockPitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_above="@id/pitch"
+        android:layout_alignLeft="@id/lockYAxis"
+        android:text="@string/lock_pitch"
+        android:textColor="#FFFFFF" />
+
+</RelativeLayout>

@@ -1,0 +1,81 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    tools:context=".MainActivity" >
+
+    <Button
+        android:id="@+id/startStopButton"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:textSize="30sp"
+        android:text="@string/connecting" />
+
+    <Button
+        android:id="@+id/homeButton"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_above="@id/startStopButton"
+        android:layout_alignRight="@id/startStopButton"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/home_button" />
+
+    <Button
+        android:id="@+id/lockButton"
+        android:onClick="lockAxis"
+        android:layout_width="71dp"
+        android:layout_height="100dp"
+        android:layout_alignBaseline="@id/homeButton"
+        android:layout_alignLeft="@id/startStopButton"
+        android:layout_marginLeft="36dp"
+        android:background="@drawable/lock_axis_button" />
+
+    <TextView
+        android:id="@+id/gripperText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/startStopButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:textColor="#FFFFFF"
+        android:text="@string/gripper_control"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/gripperOpen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/startStopButton"
+        android:layout_below="@id/gripperText"
+        android:layout_marginTop="10dp"
+        android:textColor="#FFFFFF"
+        android:text="@string/open_gripper"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+    
+    <TextView
+        android:id="@+id/gripperClosed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/startStopButton"
+        android:layout_below="@id/gripperText"
+        android:layout_marginTop="10dp"
+        android:textColor="#FFFFFF"
+        android:text="@string/close_gripper"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <SeekBar
+        android:id="@+id/gripperBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/gripperClosed"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

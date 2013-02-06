@@ -1,0 +1,203 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:orientation="vertical"
+    tools:context=".SettingsActivity" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_gravity="center_vertical"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:paddingLeft="10dp"
+        android:text="@string/setting_IP" />
+
+    <EditText
+        android:id="@+id/editIP"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:layout_gravity="center_vertical"
+        android:textColor="#FFFFFF"
+        android:ems="10" />
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dip"
+        android:background="#FFFFFF" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_gravity="center_vertical"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:paddingLeft="10dp"
+        android:text="@string/setting_port" />
+
+    <EditText
+        android:id="@+id/editPort"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:layout_gravity="center_vertical"
+        android:textColor="#FFFFFF"
+        android:ems="10" />
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dip"
+        android:background="#FFFFFF" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:textColor="#FFFFFF"
+        android:layout_gravity="center_vertical"
+        android:textSize="20sp"
+        android:paddingLeft="10dp"
+        android:text="@string/setting_sensitivity" />
+
+    <SeekBar
+        android:id="@+id/sensitivity"
+        android:layout_gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="35dp" />
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dip"
+        android:background="#FFFFFF" />
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:background="#000000"
+    	android:orientation="horizontal" >
+    	
+        <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="70dp"
+	        android:layout_gravity="center_vertical"
+	        android:textColor="#FFFFFF"
+	        android:textSize="20sp"
+	        android:paddingTop="20dp"
+	        android:paddingLeft="10dp"
+	        android:text="@string/setting_accelHZ" />
+    
+	    <Spinner
+	        android:id="@+id/accelHZ"
+	        android:layout_gravity="center_vertical"
+	        android:layout_width="wrap_content"
+	        android:layout_height="70dp"
+	        android:layout_marginLeft="20dp" />
+	    
+	</LinearLayout>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dip"
+        android:background="#FFFFFF" />
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:background="#000000"
+    	android:orientation="horizontal" >
+	    
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="70dp"
+	        android:layout_gravity="center_vertical"
+	        android:paddingTop="22dp"
+	        android:paddingLeft="10dp"
+	        android:textColor="#FFFFFF"
+	        android:textSize="20sp"
+	        android:text="@string/setting_vibration" />
+	    
+	    <View
+	        android:layout_width="51dp"
+	        android:layout_height="0dp" />
+	    
+	    <CheckBox
+	        android:id="@+id/vibration"
+	        android:layout_width="wrap_content"
+	        android:layout_height="70dp"
+	        android:text=""
+	        android:layout_gravity="center_vertical" />
+	    
+	</LinearLayout>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dip"
+        android:background="#FFFFFF" />
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:background="#000000"
+    	android:orientation="horizontal" >
+    
+	    <TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="70dp"
+		    android:layout_gravity="center_vertical"
+		    android:paddingTop="22dp"
+		    android:paddingLeft="10dp"
+		    android:textColor="#FFFFFF"
+		    android:textSize="20sp"
+		    android:text="@string/setting_sound" />
+	    
+	    <View
+	        android:layout_width="150dp"
+	        android:layout_height="0dp" />
+
+	    <CheckBox
+	        android:id="@+id/sound"
+	        android:layout_width="wrap_content"
+	        android:layout_height="70dp" />
+	    
+	</LinearLayout>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dip"
+        android:background="#FFFFFF" />
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:background="#000000"
+    	android:orientation="horizontal" >
+	    
+        <TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="70dp"
+		    android:layout_gravity="center_vertical"
+		    android:paddingTop="22dp"
+		    android:paddingLeft="10dp"
+		    android:textColor="#FFFFFF"
+		    android:textSize="20sp"
+		    android:text="@string/setting_LED" />
+        
+        <View
+	        android:layout_width="11dp"
+	        android:layout_height="0dp" />
+    
+	    <CheckBox
+	        android:id="@+id/LED"
+	        android:layout_width="wrap_content"
+	        android:layout_height="70dp"
+	        android:layout_gravity="center_vertical"
+	        android:text="" />
+	    
+	</LinearLayout>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dip"
+        android:background="#FFFFFF" />
+    
+</LinearLayout>

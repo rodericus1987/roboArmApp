@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">A.R.M</string>
+    <string name="menu_settings">Settings</string>
+    <string name="start_stop">Hold to move arm\n\n\nRelease to stop</string>
+    <string name="release_to_stop">Release to stop</string>
+    <string name="no_ip">Please set a server IP and Port in "Settings"</string>
+    <string name="connecting">Connecting to server...</string>
+    <string name="connect_error">Connection failed!</string>
+    <string name="home_dialog_message">You are about to return the arm to home position</string>
+    <string name="home_dialog_title">Home robot arm</string>
+    <string name="proceed">Proceed</string>
+    <string name="cancel">Cancel</string>
+    <string name="title_activity_lock_axis">Lock Axis</string>
+    <string name="lock_z">Lock Z Axis</string>
+    <string name="lock_x">Lock X Axis</string>
+    <string name="lock_y">Lock Y Axis</string>
+    <string name="lock_roll">Lock Roll</string>
+    <string name="lock_pitch">Lock Pitch</string>
+    <string name="gripper_control"><b><u>Gripper Control</u></b></string>
+    <string name="open_gripper"><b><u>Open</u></b></string>
+    <string name="close_gripper"><b><u>Closed</u></b></string>
+    <string name="done_button">Done</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="setting_IP">Server IP</string>
+    <string name="setting_port">Server Port</string>
+    <string name="setting_sensitivity">Device movement sensitivity</string>
+    <string name="setting_vibration">Enable vibration feedback</string>
+    <string name="setting_sound">Enable sounds</string>
+    <string name="setting_LED">Enable LED when A.R.M active</string>
+    <string name="setting_accelHZ">Sensor sampling rate</string>
+
+</resources>
