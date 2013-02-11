@@ -1,10 +1,8 @@
 package com.example.roboarmapp;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -41,12 +39,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static String serverIP = "192.168.43.139";
 	public static String serverPort = "4012";
 	public static Socket mySocket;
+	public static OutputStream out;
 
 	// Sensors
 	private SensorManager mSensorManager;
 	private long lastMeasurement1, lastMeasurement2;
 	private Sensor mAccelerometer;
 	private Sensor mOrientation;
+	private boolean reference;
+	private float referenceRoll;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +67,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					Button lockButton = (Button) findViewById(R.id.lockButton);
 					homeButton.setEnabled(false);
 					lockButton.setEnabled(false);
+					startSensors();
 					moveRobotArm(System.currentTimeMillis());
 					return true;
 				}
@@ -78,6 +80,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					Button lockButton = (Button) findViewById(R.id.lockButton);
 					homeButton.setEnabled(true);
 					lockButton.setEnabled(true);
+					stopSensors();
 					resetMainButton();
 					return true;
 				}
@@ -172,6 +175,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 		lastMeasurement1 = System.nanoTime();
 		lastMeasurement2 = System.nanoTime();
+		reference = true;
 	}
 
 	public void stopSensors() {
@@ -208,12 +212,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onPause() {
-		/*try {
+		try {
+			out.flush();
+			out.close();
 			mySocket.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
 		super.onPause();
 	}
 
@@ -224,18 +230,18 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 			try {
 				mySocket = new Socket(serverIP, Integer.parseInt(serverPort));
-				OutputStream out = mySocket.getOutputStream();
-				out.write(1);
-				/*ObjectOutputStream out = new ObjectOutputStream(mySocket.getOutputStream());
+				out = mySocket.getOutputStream();
+				/*out.write(1);
+				ObjectOutputStream out = new ObjectOutputStream(mySocket.getOutputStream());
 				DataPacket packetToServer = new DataPacket();
 				packetToServer.x = (float)1.1;
 				packetToServer.y = (float)2.2;
 				packetToServer.z = (float)3.3;
-				out.writeObject(packetToServer);*/
+				out.writeObject(packetToServer);
 				out.flush();
-				out.close();
+				out.close();*/
 				Log.d("DEBUG: ", "Tried Connection");
-				mySocket.close();
+				//mySocket.close();
 			} catch (IOException e) {
 				Log.e("ERR: ", e.getMessage());
 			}
@@ -263,7 +269,26 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		// TODO Auto-generated method stub
-
+		if (event.sensor.equals(mOrientation)) {
+			if (reference) {
+				referenceRoll = event.values[2];
+				reference = false;
+			}
+			float roll = event.values[2] - referenceRoll;
+			Log.d("DEBUG: ", "The current roll value is " + roll);
+			int rollData = Float.floatToRawIntBits(roll);
+			byte outFloatData [] = new byte [4];
+			outFloatData[3] = (byte)(rollData >> 24);
+			outFloatData[2] = (byte)(rollData >> 16);
+			outFloatData[1] = (byte)(rollData >> 8);
+			outFloatData[0] = (byte)(rollData);
+			try {
+				out.write(outFloatData);
+				out.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 }
