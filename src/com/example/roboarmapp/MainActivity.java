@@ -49,6 +49,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private Sensor mGyroscope;
 	private boolean reference;
 	private float referenceRoll;
+	private static final float NS2S = 1.0f / 1000000000.0f;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -277,7 +278,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			long timeInterval = event.timestamp - lastMeasurement2;
 			lastMeasurement2 = event.timestamp;
 			// Assume the device has been turning with same speed for the whole interval
-			roll = (float) ((roll * (timeInterval / 1000000) / 1000) * 360 / Math.PI);
+			roll = (float) (roll * timeInterval / 2 * NS2S * 360 / Math.PI);
 			Log.d("DEBUG: ", "The current roll value is " + roll);
 			int rollData = Float.floatToRawIntBits(roll);
 			byte outFloatData [] = new byte[4];
