@@ -175,7 +175,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 				SensorManager.SENSOR_DELAY_NORMAL);
 		mSensorManager.registerListener(this, mOrientation,
 				SensorManager.SENSOR_DELAY_NORMAL);
-		mSensorManager.registerListener(this, mGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+		mSensorManager.registerListener(this, mGyroscope,
+				SensorManager.SENSOR_DELAY_NORMAL);
 
 		lastMeasurement1 = System.nanoTime();
 		lastMeasurement2 = System.nanoTime();
@@ -184,6 +185,29 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	public void stopSensors() {
 		mSensorManager.unregisterListener(this);
+	}
+
+	public void doSend(float[] outFloatData) {
+		for (int i = 0; i < outFloatData.length; i++) {
+			int data = Float.floatToRawIntBits(outFloatData[i]);
+			byte outByteData[] = new byte[4];
+			outByteData[3] = (byte) (data >> 24);
+			outByteData[2] = (byte) (data >> 16);
+			outByteData[1] = (byte) (data >> 8);
+			outByteData[0] = (byte) (data);
+			try {
+				out.write(outByteData);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+			out.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -235,17 +259,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 			try {
 				mySocket = new Socket(serverIP, Integer.parseInt(serverPort));
 				out = mySocket.getOutputStream();
-				/*out.write(1);
-				ObjectOutputStream out = new ObjectOutputStream(mySocket.getOutputStream());
-				DataPacket packetToServer = new DataPacket();
-				packetToServer.x = (float)1.1;
-				packetToServer.y = (float)2.2;
-				packetToServer.z = (float)3.3;
-				out.writeObject(packetToServer);
-				out.flush();
-				out.close();*/
+				/*
+				 * out.write(1); ObjectOutputStream out = new
+				 * ObjectOutputStream(mySocket.getOutputStream()); DataPacket
+				 * packetToServer = new DataPacket(); packetToServer.x =
+				 * (float)1.1; packetToServer.y = (float)2.2; packetToServer.z =
+				 * (float)3.3; out.writeObject(packetToServer); out.flush();
+				 * out.close();
+				 */
 				Log.d("DEBUG: ", "Tried Connection");
-				//mySocket.close();
+				// mySocket.close();
 			} catch (IOException e) {
 				Log.e("ERR: ", e.getMessage());
 			}
@@ -274,49 +297,28 @@ public class MainActivity extends Activity implements SensorEventListener {
 	@Override
 	public void onSensorChanged(SensorEvent event) {
 		if (event.sensor.equals(mGyroscope)) {
-			float roll = event.values[1];   // around axis y
+			float roll = event.values[1]; // around axis y
 			long timeInterval = event.timestamp - lastMeasurement2;
 			lastMeasurement2 = event.timestamp;
-			// Assume the device has been turning with same speed for the whole interval
+			// Assume the device has been turning with same speed for the whole
+			// interval
 			roll = (float) (roll * timeInterval / 2 * NS2S * 360 / Math.PI);
 			Log.d("DEBUG: ", "The current roll value is " + roll);
-			int rollData = Float.floatToRawIntBits(roll);
-			byte outFloatData [] = new byte[4];
-			outFloatData[3] = (byte)(rollData >> 24);
-			outFloatData[2] = (byte)(rollData >> 16);
-			outFloatData[1] = (byte)(rollData >> 8);
-			outFloatData[0] = (byte)(rollData);
-			try {
-				out.write(outFloatData);
-				out.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			float[] outFloatData = { roll, 0, 0, 0, 0 };
+			doSend(outFloatData);
 		}
-		
+
 		/*
-		if (event.sensor.equals(mOrientation)) {
-			if (reference) {
-				referenceRoll = event.values[2];
-				reference = false;
-			}
-			float roll = event.values[2] - referenceRoll;
-			Log.d("DEBUG: ", "The current roll value is " + roll);
-			int rollData = Float.floatToRawIntBits(roll);
-			byte outFloatData [] = new byte [4];
-			outFloatData[3] = (byte)(rollData >> 24);
-			outFloatData[2] = (byte)(rollData >> 16);
-			outFloatData[1] = (byte)(rollData >> 8);
-			outFloatData[0] = (byte)(rollData);
-			try {
-				out.write(outFloatData);
-				out.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		*/
+		 * if (event.sensor.equals(mOrientation)) { if (reference) {
+		 * referenceRoll = event.values[2]; reference = false; } float roll =
+		 * event.values[2] - referenceRoll; Log.d("DEBUG: ",
+		 * "The current roll value is " + roll); int rollData =
+		 * Float.floatToRawIntBits(roll); byte outFloatData [] = new byte [4];
+		 * outFloatData[3] = (byte)(rollData >> 24); outFloatData[2] =
+		 * (byte)(rollData >> 16); outFloatData[1] = (byte)(rollData >> 8);
+		 * outFloatData[0] = (byte)(rollData); try { out.write(outFloatData);
+		 * out.flush(); } catch (IOException e) { // TODO Auto-generated catch
+		 * block e.printStackTrace(); } }
+		 */
 	}
 }
