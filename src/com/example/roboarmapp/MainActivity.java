@@ -48,7 +48,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private Sensor mOrientation;
 	private Sensor mGyroscope;
 	private boolean reference;
-	private float referenceRoll;
 	private static final float NS2S = 1.0f / 1000000000.0f;
 
 	@Override
@@ -298,13 +297,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public void onSensorChanged(SensorEvent event) {
 		if (event.sensor.equals(mGyroscope)) {
 			float roll = event.values[1]; // around axis y
+			float pitch = event.values[0]; // around axis x
 			long timeInterval = event.timestamp - lastMeasurement2;
 			lastMeasurement2 = event.timestamp;
 			// Assume the device has been turning with same speed for the whole
 			// interval
-			roll = (float) (roll * timeInterval / 2 * NS2S * 360 / Math.PI);
+			roll = (float) (roll * timeInterval * NS2S * 360 / Math.PI / 2);
+			pitch = (float) (pitch * timeInterval * NS2S * 360 / Math.PI / 2);
 			Log.d("DEBUG: ", "The current roll value is " + roll);
-			float[] outFloatData = { roll, 0, 0, 0, 0 };
+			float[] outFloatData = { roll, pitch, 0, 0, 0, 0 };
 			doSend(outFloatData);
 		}
 
