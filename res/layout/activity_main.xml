@@ -76,6 +76,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
+        android:max="100"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

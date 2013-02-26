@@ -36,7 +36,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static boolean zAxisLocked = false;
 	public static boolean rollLocked = false;
 	public static boolean pitchLocked = false;
-	public static String serverIP = "192.168.43.139";
+	public static String serverIP = "192.168.43.89";
 	public static String serverPort = "4012";
 	public static Socket mySocket;
 	public static OutputStream out;
@@ -49,6 +49,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private Sensor mGyroscope;
 	private boolean reference;
 	private static final float NS2S = 1.0f / 1000000000.0f;
+	private float rollAngle;
+	private float pitchAngle;
+	private float referenceRoll;
+	private float referencePitch;
+	private float grip;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +123,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			@Override
 			public void onProgressChanged(SeekBar arg0, int progress,
 					boolean arg2) {
-				// TODO Auto-generated method stub
+				grip = (float) progress;
 			}
 
 			@Override
@@ -129,8 +134,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 			@Override
 			public void onStopTrackingTouch(SeekBar arg0) {
-				// TODO Auto-generated method stub
-
+				Log.d("CHECK:", "Current progress is " + grip);
+				float[] outFloatData = { rollAngle, pitchAngle, 0, 0, 0, grip };
+				doSend(outFloatData);
 			}
 		});
 	}
@@ -180,6 +186,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 		lastMeasurement1 = System.nanoTime();
 		lastMeasurement2 = System.nanoTime();
 		reference = true;
+		//rollAngle = 0;
+		//pitchAngle = 0;
 	}
 
 	public void stopSensors() {
@@ -302,24 +310,64 @@ public class MainActivity extends Activity implements SensorEventListener {
 			lastMeasurement2 = event.timestamp;
 			// Assume the device has been turning with same speed for the whole
 			// interval
-			roll = (float) (roll * timeInterval * NS2S * 360 / Math.PI / 2);
-			pitch = (float) (pitch * timeInterval * NS2S * 360 / Math.PI / 2);
-			Log.d("DEBUG: ", "The current roll value is " + roll);
-			float[] outFloatData = { roll, pitch, 0, 0, 0, 0 };
+			roll = (float) (roll * timeInterval * NS2S);
+			pitch = (float) (pitch * timeInterval * NS2S);
+			rollAngle = rollAngle + roll;
+			pitchAngle = pitchAngle + pitch;
+			/*Log.d("DEBUG: ", "The current roll value is " + rollAngle * 360 / 2
+					/ Math.PI);*/
+			float[] outFloatData = { rollAngle, pitchAngle, 0, 0, 0, grip };
 			doSend(outFloatData);
 		}
 
-		/*
-		 * if (event.sensor.equals(mOrientation)) { if (reference) {
-		 * referenceRoll = event.values[2]; reference = false; } float roll =
-		 * event.values[2] - referenceRoll; Log.d("DEBUG: ",
-		 * "The current roll value is " + roll); int rollData =
-		 * Float.floatToRawIntBits(roll); byte outFloatData [] = new byte [4];
-		 * outFloatData[3] = (byte)(rollData >> 24); outFloatData[2] =
-		 * (byte)(rollData >> 16); outFloatData[1] = (byte)(rollData >> 8);
-		 * outFloatData[0] = (byte)(rollData); try { out.write(outFloatData);
-		 * out.flush(); } catch (IOException e) { // TODO Auto-generated catch
-		 * block e.printStackTrace(); } }
-		 */
+		if (event.sensor.equals(mOrientation)) {
+			float roll = event.values[2];
+			float pitch = event.values[1];
+			if (pitch > 90) {
+				if (roll > 0)
+					roll = 180 - roll;
+				else 
+					roll = -180 - roll;
+			}
+			
+			if (reference) {
+				referenceRoll = roll;
+				referencePitch = pitch;
+				reference = false;
+			}
+			
+			float tempRoll = (float) (referenceRoll + rollAngle * 360 / 2 / Math.PI);
+			float tempPitch = (float) (referencePitch + pitchAngle * 360 / 2 / Math.PI);
+			while (tempRoll > 180) {
+				tempRoll = tempRoll - 360;
+			}
+			while (tempRoll < -180) {
+				tempRoll = tempRoll + 360;
+			}
+			while (tempPitch > 180) {
+				tempPitch = tempPitch - 360;
+			}
+			while (tempPitch < -180) {
+				tempPitch = tempPitch + 360;
+			}
+			
+			float diffRoll = roll - tempRoll;
+			float diffPitch = pitch - tempPitch;
+			if (diffRoll > 180) {
+				diffRoll = diffRoll - 360;
+			}
+			else if (diffRoll < -180) {
+				diffRoll = diffRoll + 360;
+			}
+			if (diffPitch > 180) {
+				diffPitch = diffPitch - 360;
+			}
+			else if (diffPitch < -180) {
+				diffPitch = diffPitch + 360;
+			}
+			Log.d("CHECK:", "The current roll is " + tempRoll + "; The expected roll is " + roll);
+			//Log.d("CHECK:", "The current roll is " + (rollAngle * 360 / 2 / Math.PI) + "; The expected roll is " + (diffPitch + rollAngle * 360 / 2 / Math.PI));
+		}
+
 	}
 }
