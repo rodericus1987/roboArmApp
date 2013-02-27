@@ -2,6 +2,8 @@ package com.example.roboarmapp;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
@@ -13,7 +15,7 @@ public class LockAxis extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_lock_axis);
 		// Show the Up button in the action bar.
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		//getActionBar().setDisplayHomeAsUpEnabled(true);
 		CheckBox xBox = (CheckBox)findViewById(R.id.lockXAxis);
 		CheckBox yBox = (CheckBox)findViewById(R.id.lockYAxis);
 		CheckBox zBox = (CheckBox)findViewById(R.id.lockZAxis);
@@ -91,7 +93,7 @@ public class LockAxis extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_lock_axis, menu);
 		return true;
-	}
+	}*/
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -104,16 +106,25 @@ public class LockAxis extends Activity {
 			//
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
-			NavUtils.navigateUpFromSameTask(this);
 			finish();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
-	}*/
+	}
 	
 	/** Called when the user clicks the Done button */
     public void doneButton(View view) {
     	finish();
+    }
+    
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if ((keyCode == KeyEvent.KEYCODE_BACK))
+        {
+            finish();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
 }
