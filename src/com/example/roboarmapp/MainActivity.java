@@ -59,8 +59,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static float[] rotationVector;
 	public static float[] rotationMatrix;
 	public static float[] acceleration;
-	public static float rollAngle;
-	public static float pitchAngle;
+	public static float[] speed;
+	public static float[] displacement = new float [3];
+	public static float rollAngle = 0;
+	public static float pitchAngle = 0;
 	private float referenceRoll;
 	private float referencePitch;
 	public static float grip;
@@ -219,6 +221,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 		rotationVector = new float [3];
 		acceleration = new float [4];
+		speed = new float [3];
+		displacement = new float [3];
 		lastMeasurement1 = System.nanoTime();
 		lastMeasurement2 = System.nanoTime();
 		reference = true;
@@ -366,6 +370,24 @@ public class MainActivity extends Activity implements SensorEventListener {
 			Matrix.invertM(rotationMatrix, 0, temp, 0);
 			Matrix.multiplyMV(acceleration, 0, rotationMatrix, 0, rawLinear, 0);
 			//Log.d("CHECK:", "x = " + acceleration[0] + "; y = " + acceleration[1] + "; z = " + acceleration[2]);
+			long timeInterval = event.timestamp - lastMeasurement1;
+			lastMeasurement1 = event.timestamp;
+			
+			if (!xAxisLocked) {
+				speed[0] = (float) (acceleration[0] * timeInterval * NS2S) + speed[0];
+				displacement[0] = (float) (speed[0] * timeInterval * NS2S) + displacement[0];
+			}
+			
+			if (!yAxisLocked) {
+				speed[1] = (float) (acceleration[1] * timeInterval * NS2S) + speed[1];
+				displacement[1] = (float) (speed[1] * timeInterval * NS2S) + displacement[1];
+			}
+			
+			if (!zAxisLocked) {
+				speed[2] = (float) (acceleration[2] * timeInterval * NS2S) + speed[2];
+				displacement[2] = (float) (speed[2] * timeInterval * NS2S) + displacement[2];				
+			}
+			//Log.d("CHECK:", "x = " + displacement[0] + "; y = " + displacement[1] + "; z = " + displacement[2]);
 		}
 		
 		if (event.sensor.equals(mRotation)) {
@@ -432,7 +454,7 @@ class doSendTimerTask extends TimerTask {
 	public void run() {
 		if (MainActivity.socketConnected) {
 			float[] outFloatData = { MainActivity.rollAngle,
-					MainActivity.pitchAngle, 0, 0, 0, MainActivity.grip };
+					MainActivity.pitchAngle, MainActivity.displacement[0], MainActivity.displacement[1], MainActivity.displacement[2], MainActivity.grip };
 			boolean dataHasChanged = false;
 			for (int i = 0; i < outFloatData.length; i++) {
 				if (outFloatData[i] != MainActivity.prevSentDataVector[i]) {
@@ -441,6 +463,10 @@ class doSendTimerTask extends TimerTask {
 				}
 			}
 			if (dataHasChanged) {
+				//MainActivity.displacement[0] = 0;
+				//MainActivity.displacement[1] = 0;
+				//MainActivity.displacement[2] = 0;
+				
 				for (int i = 0; i < outFloatData.length; i++) {
 					MainActivity.prevSentDataVector[i] = outFloatData[i];
 					int data = Float.floatToRawIntBits(outFloatData[i]);
