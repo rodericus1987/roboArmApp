@@ -463,9 +463,9 @@ class doSendTimerTask extends TimerTask {
 				}
 			}
 			if (dataHasChanged) {
-				//MainActivity.displacement[0] = 0;
-				//MainActivity.displacement[1] = 0;
-				//MainActivity.displacement[2] = 0;
+				MainActivity.displacement[0] = 0;
+				MainActivity.displacement[1] = 0;
+				MainActivity.displacement[2] = 0;
 				
 				for (int i = 0; i < outFloatData.length; i++) {
 					MainActivity.prevSentDataVector[i] = outFloatData[i];
