@@ -17,6 +17,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -43,20 +44,21 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static Socket mySocket;
 	public static OutputStream out;
 	public static boolean socketConnected = false;
-	
+
 	public static boolean aboutToLock;
-	
+
 	private final int period = 1000; // # of ms between tcp/ip data send
 
 	// Sensors
 	private SensorManager mSensorManager;
 	private long lastMeasurement1, lastMeasurement2;
-	private Sensor mAccelerometer;
-	private Sensor mOrientation;
-	private Sensor mGyroscope;
+	private Sensor mAccelerometer, mOrientation, mGyroscope, mRotation;
 	private boolean reference;
 	private static final float NS2S = 1.0f / 1000000000.0f;
 	public static float[] prevSentDataVector;
+	public static float[] rotationVector;
+	public static float[] rotationMatrix;
+	public static float[] acceleration;
 	public static float rollAngle;
 	public static float pitchAngle;
 	private float referenceRoll;
@@ -67,25 +69,25 @@ public class MainActivity extends Activity implements SensorEventListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		prevSentDataVector = new float[6];
 		for (int i = 0; i < 0; i++) {
 			prevSentDataVector[i] = 0.0f;
 		}
-		
+
 		// set default settings
-		//serverIP = "192.168.0.10";
-		//serverPort = "4012";
-		//xAxisLocked = false;
-		//yAxisLocked = false;
-		//zAxisLocked = false;
-		//rollLocked = false;
-		//pitchLocked = false;
-		//socketConnected = false;
-		
+		// serverIP = "192.168.0.10";
+		// serverPort = "4012";
+		// xAxisLocked = false;
+		// yAxisLocked = false;
+		// zAxisLocked = false;
+		// rollLocked = false;
+		// pitchLocked = false;
+		// socketConnected = false;
+
 		doSendTimerTask myTask = new doSendTimerTask();
-        Timer myTimer = new Timer();
-        myTimer.schedule(myTask, period, period);
+		Timer myTimer = new Timer();
+		myTimer.schedule(myTask, period, period);
 
 		Button myMainButton = (Button) findViewById(R.id.startStopButton);
 		myMainButton.setOnTouchListener(new OnTouchListener() {
@@ -162,8 +164,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 			@Override
 			public void onStopTrackingTouch(SeekBar arg0) {
 				Log.d("CHECK:", "Current progress is " + grip);
-				//float[] outFloatData = { rollAngle, pitchAngle, 0, 0, 0, grip };
-				//doSend(outFloatData);
+				// float[] outFloatData = { rollAngle, pitchAngle, 0, 0, 0, grip
+				// };
+				// doSend(outFloatData);
 			}
 		});
 	}
@@ -204,46 +207,40 @@ public class MainActivity extends Activity implements SensorEventListener {
 				.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 		mOrientation = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 		mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+		mRotation = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 		mSensorManager.registerListener(this, mAccelerometer,
 				SensorManager.SENSOR_DELAY_NORMAL);
 		mSensorManager.registerListener(this, mOrientation,
 				SensorManager.SENSOR_DELAY_NORMAL);
 		mSensorManager.registerListener(this, mGyroscope,
 				SensorManager.SENSOR_DELAY_NORMAL);
+		mSensorManager.registerListener(this, mRotation,
+				SensorManager.SENSOR_DELAY_NORMAL);
 
+		rotationVector = new float [3];
+		acceleration = new float [4];
 		lastMeasurement1 = System.nanoTime();
 		lastMeasurement2 = System.nanoTime();
 		reference = true;
-		//rollAngle = 0;
-		//pitchAngle = 0;
+		// rollAngle = 0;
+		// pitchAngle = 0;
 	}
 
 	public void stopSensors() {
 		mSensorManager.unregisterListener(this);
 	}
 
-	/*public void doSend(float[] outFloatData) {
-		for (int i = 0; i < outFloatData.length; i++) {
-			int data = Float.floatToRawIntBits(outFloatData[i]);
-			byte outByteData[] = new byte[4];
-			outByteData[3] = (byte) (data >> 24);
-			outByteData[2] = (byte) (data >> 16);
-			outByteData[1] = (byte) (data >> 8);
-			outByteData[0] = (byte) (data);
-			try {
-				out.write(outByteData);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		try {
-			out.flush();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}*/
+	/*
+	 * public void doSend(float[] outFloatData) { for (int i = 0; i <
+	 * outFloatData.length; i++) { int data =
+	 * Float.floatToRawIntBits(outFloatData[i]); byte outByteData[] = new
+	 * byte[4]; outByteData[3] = (byte) (data >> 24); outByteData[2] = (byte)
+	 * (data >> 16); outByteData[1] = (byte) (data >> 8); outByteData[0] =
+	 * (byte) (data); try { out.write(outByteData); } catch (IOException e) { //
+	 * TODO Auto-generated catch block e.printStackTrace(); } } try {
+	 * out.flush(); } catch (IOException e) { // TODO Auto-generated catch block
+	 * e.printStackTrace(); } }
+	 */
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -265,7 +262,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		Button myMainButton = (Button) findViewById(R.id.startStopButton);
 		if (serverIP == null) {
 			myMainButton.setText(R.string.no_ip);
-		} else if (!socketConnected){
+		} else if (!socketConnected) {
 			myMainButton.setBackgroundColor(Color.YELLOW);
 			myMainButton.setText(R.string.connecting);
 			myMainButton.setText(R.string.connecting);
@@ -347,15 +344,32 @@ public class MainActivity extends Activity implements SensorEventListener {
 				roll = (float) (roll * timeInterval * NS2S);
 				rollAngle = rollAngle + roll;
 			}
-			
+
 			if (!pitchLocked) {
 				pitch = (float) (pitch * timeInterval * NS2S);
 				pitchAngle = pitchAngle + pitch;
 			}
-			/*Log.d("DEBUG: ", "The current roll value is " + rollAngle * 360 / 2
-					/ Math.PI);*/
-			//float[] outFloatData = { rollAngle, pitchAngle, 0, 0, 0, grip };
-			//doSend(outFloatData);
+			/*
+			 * Log.d("DEBUG: ", "The current roll value is " + rollAngle * 360 /
+			 * 2 / Math.PI);
+			 */
+			// float[] outFloatData = { rollAngle, pitchAngle, 0, 0, 0, grip };
+			// doSend(outFloatData);
+		}
+
+		if (event.sensor.equals(mAccelerometer)) {
+			float [] rawLinear = { event.values[0], event.values[1],
+					event.values[2], 0 };
+			float [] temp = new float [16];
+			rotationMatrix = new float [16];
+			SensorManager.getRotationMatrixFromVector(temp, rotationVector);
+			Matrix.invertM(rotationMatrix, 0, temp, 0);
+			Matrix.multiplyMV(acceleration, 0, rotationMatrix, 0, rawLinear, 0);
+			//Log.d("CHECK:", "x = " + acceleration[0] + "; y = " + acceleration[1] + "; z = " + acceleration[2]);
+		}
+		
+		if (event.sensor.equals(mRotation)) {
+			rotationVector = event.values;
 		}
 
 		if (event.sensor.equals(mOrientation)) {
@@ -364,18 +378,20 @@ public class MainActivity extends Activity implements SensorEventListener {
 			if (pitch > 90) {
 				if (roll > 0)
 					roll = 180 - roll;
-				else 
+				else
 					roll = -180 - roll;
 			}
-			
+
 			if (reference) {
 				referenceRoll = roll;
 				referencePitch = pitch;
 				reference = false;
 			}
-			
-			float tempRoll = (float) (referenceRoll + rollAngle * 360 / 2 / Math.PI);
-			float tempPitch = (float) (referencePitch + pitchAngle * 360 / 2 / Math.PI);
+
+			float tempRoll = (float) (referenceRoll + rollAngle * 360 / 2
+					/ Math.PI);
+			float tempPitch = (float) (referencePitch + pitchAngle * 360 / 2
+					/ Math.PI);
 			while (tempRoll > 180) {
 				tempRoll = tempRoll - 360;
 			}
@@ -388,33 +404,35 @@ public class MainActivity extends Activity implements SensorEventListener {
 			while (tempPitch < -180) {
 				tempPitch = tempPitch + 360;
 			}
-			
+
 			float diffRoll = roll - tempRoll;
 			float diffPitch = pitch - tempPitch;
 			if (diffRoll > 180) {
 				diffRoll = diffRoll - 360;
-			}
-			else if (diffRoll < -180) {
+			} else if (diffRoll < -180) {
 				diffRoll = diffRoll + 360;
 			}
 			if (diffPitch > 180) {
 				diffPitch = diffPitch - 360;
-			}
-			else if (diffPitch < -180) {
+			} else if (diffPitch < -180) {
 				diffPitch = diffPitch + 360;
 			}
-			Log.d("CHECK:", "The current roll is " + tempRoll + "; The expected roll is " + roll);
-			//Log.d("CHECK:", "The current roll is " + (rollAngle * 360 / 2 / Math.PI) + "; The expected roll is " + (diffPitch + rollAngle * 360 / 2 / Math.PI));
+			/*
+			Log.d("CHECK:", "The current roll is " + tempRoll
+					+ "; The expected roll is " + roll);*/
+			// Log.d("CHECK:", "The current roll is " + (rollAngle * 360 / 2 /
+			// Math.PI) + "; The expected roll is " + (diffPitch + rollAngle *
+			// 360 / 2 / Math.PI));
 		}
 
 	}
 }
 
-
 class doSendTimerTask extends TimerTask {
 	public void run() {
 		if (MainActivity.socketConnected) {
-			float[] outFloatData = { MainActivity.rollAngle, MainActivity.pitchAngle, 0, 0, 0, MainActivity.grip };
+			float[] outFloatData = { MainActivity.rollAngle,
+					MainActivity.pitchAngle, 0, 0, 0, MainActivity.grip };
 			boolean dataHasChanged = false;
 			for (int i = 0; i < outFloatData.length; i++) {
 				if (outFloatData[i] != MainActivity.prevSentDataVector[i]) {
