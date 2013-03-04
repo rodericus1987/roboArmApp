@@ -6,7 +6,7 @@
     <string name="start_stop">Hold to move arm\n\n\nRelease to stop</string>
     <string name="release_to_stop">Release to stop</string>
     <string name="no_ip">Please set a server IP</string>
-    <string name="connecting">Connecting to server#8230</string>
+    <string name="connecting">Connecting to server&#8230;</string>
     <string name="connect_error">Connection failed!\nTap to retry</string>
     <string name="home_dialog_message">You are about to return the arm to home position</string>
     <string name="home_dialog_title">Home robot arm</string>
