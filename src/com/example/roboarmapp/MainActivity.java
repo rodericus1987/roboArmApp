@@ -368,6 +368,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 						switch (event.getAction()) {
 						case MotionEvent.ACTION_DOWN: {
 							if (!socketConnected) {
+								SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
+								gripperBar.setEnabled(true);
 								Button myMainButton = (Button) findViewById(R.id.startStopButton);
 								myMainButton.setText(R.string.connect_error);
 								myMainButton.setBackgroundColor(Color.YELLOW);
@@ -398,6 +400,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 						case MotionEvent.ACTION_UP: {
 							if (!socketConnected) {
+								SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
+								gripperBar.setEnabled(true);
 								Button myMainButton = (Button) findViewById(R.id.startStopButton);
 								myMainButton.setText(R.string.connect_error);
 								myMainButton.setBackgroundColor(Color.YELLOW);
