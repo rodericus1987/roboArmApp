@@ -67,6 +67,9 @@ public class SettingsActivity extends Activity {
 			//
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
+			MainActivity.serverIP = ipAddress.getText().toString();
+			MainActivity.serverPort = portText.getText().toString();
+			MainActivity.period = sendRateText.getText().toString();
 			finish();
 			return true;
 		}
