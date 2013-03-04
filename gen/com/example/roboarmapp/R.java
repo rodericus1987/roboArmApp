@@ -26,12 +26,13 @@ public final class R {
         public static final int white_axis_dbl=0x7f02000c;
     }
     public static final class id {
-        public static final int LED=0x7f070016;
-        public static final int accelHZ=0x7f070013;
+        public static final int LED=0x7f070017;
+        public static final int accelHZ=0x7f070014;
         public static final int axis=0x7f070000;
         public static final int doneButton=0x7f070004;
         public static final int editIP=0x7f070010;
         public static final int editPort=0x7f070011;
+        public static final int editSendRate=0x7f070012;
         public static final int gripperBar=0x7f07000f;
         public static final int gripperClosed=0x7f07000e;
         public static final int gripperOpen=0x7f07000d;
@@ -43,13 +44,13 @@ public final class R {
         public static final int lockXAxis=0x7f070003;
         public static final int lockYAxis=0x7f070002;
         public static final int lockZAxis=0x7f070001;
-        public static final int menu_settings=0x7f070017;
+        public static final int menu_settings=0x7f070018;
         public static final int pitch=0x7f070007;
         public static final int roll=0x7f070005;
-        public static final int sensitivity=0x7f070012;
-        public static final int sound=0x7f070015;
+        public static final int sensitivity=0x7f070013;
+        public static final int sound=0x7f070016;
         public static final int startStopButton=0x7f070009;
-        public static final int vibration=0x7f070014;
+        public static final int vibration=0x7f070015;
     }
     public static final class layout {
         public static final int activity_lock_axis=0x7f030000;
@@ -83,12 +84,13 @@ public final class R {
         public static final int proceed=0x7f040009;
         public static final int release_to_stop=0x7f040003;
         public static final int setting_IP=0x7f040016;
-        public static final int setting_LED=0x7f04001b;
-        public static final int setting_accelHZ=0x7f04001c;
+        public static final int setting_LED=0x7f04001c;
+        public static final int setting_accelHZ=0x7f04001d;
         public static final int setting_port=0x7f040017;
-        public static final int setting_sensitivity=0x7f040018;
-        public static final int setting_sound=0x7f04001a;
-        public static final int setting_vibration=0x7f040019;
+        public static final int setting_send_rate=0x7f040018;
+        public static final int setting_sensitivity=0x7f040019;
+        public static final int setting_sound=0x7f04001b;
+        public static final int setting_vibration=0x7f04001a;
         public static final int start_stop=0x7f040002;
         public static final int title_activity_lock_axis=0x7f04000b;
         public static final int title_activity_settings=0x7f040015;

@@ -1,203 +1,226 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#000000"
-    android:orientation="vertical"
-    tools:context=".SettingsActivity" >
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="35dp"
-        android:layout_gravity="center_vertical"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:paddingLeft="10dp"
-        android:text="@string/setting_IP" />
-
-    <EditText
-        android:id="@+id/editIP"
-        android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:layout_gravity="center_vertical"
-        android:textColor="#FFFFFF"
-        android:ems="10" />
-    
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:background="#FFFFFF" />
-    
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="35dp"
-        android:layout_gravity="center_vertical"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:paddingLeft="10dp"
-        android:text="@string/setting_port" />
-
-    <EditText
-        android:id="@+id/editPort"
-        android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:layout_gravity="center_vertical"
-        android:textColor="#FFFFFF"
-        android:ems="10" />
-    
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:background="#FFFFFF" />
-    
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="35dp"
-        android:textColor="#FFFFFF"
-        android:layout_gravity="center_vertical"
-        android:textSize="20sp"
-        android:paddingLeft="10dp"
-        android:text="@string/setting_sensitivity" />
-
-    <SeekBar
-        android:id="@+id/sensitivity"
-        android:layout_gravity="center_vertical"
-        android:layout_width="match_parent"
-        android:layout_height="35dp" />
-    
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:background="#FFFFFF" />
-    
     <LinearLayout
-        android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:background="#000000"
-    	android:orientation="horizontal" >
-    	
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:orientation="vertical"
+        tools:context=".SettingsActivity" >
+
         <TextView
-	        android:layout_width="wrap_content"
-	        android:layout_height="70dp"
-	        android:layout_gravity="center_vertical"
-	        android:textColor="#FFFFFF"
-	        android:textSize="20sp"
-	        android:paddingTop="20dp"
-	        android:paddingLeft="10dp"
-	        android:text="@string/setting_accelHZ" />
-    
-	    <Spinner
-	        android:id="@+id/accelHZ"
-	        android:layout_gravity="center_vertical"
-	        android:layout_width="wrap_content"
-	        android:layout_height="70dp"
-	        android:layout_marginLeft="20dp" />
-	    
-	</LinearLayout>
-    
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:background="#FFFFFF" />
-    
-    <LinearLayout
-        android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:background="#000000"
-    	android:orientation="horizontal" >
-	    
-	    <TextView
-	        android:layout_width="wrap_content"
-	        android:layout_height="70dp"
-	        android:layout_gravity="center_vertical"
-	        android:paddingTop="22dp"
-	        android:paddingLeft="10dp"
-	        android:textColor="#FFFFFF"
-	        android:textSize="20sp"
-	        android:text="@string/setting_vibration" />
-	    
-	    <View
-	        android:layout_width="51dp"
-	        android:layout_height="0dp" />
-	    
-	    <CheckBox
-	        android:id="@+id/vibration"
-	        android:layout_width="wrap_content"
-	        android:layout_height="70dp"
-	        android:text=""
-	        android:layout_gravity="center_vertical" />
-	    
-	</LinearLayout>
-    
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:background="#FFFFFF" />
-    
-    <LinearLayout
-        android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:background="#000000"
-    	android:orientation="horizontal" >
-    
-	    <TextView
-		    android:layout_width="wrap_content"
-		    android:layout_height="70dp"
-		    android:layout_gravity="center_vertical"
-		    android:paddingTop="22dp"
-		    android:paddingLeft="10dp"
-		    android:textColor="#FFFFFF"
-		    android:textSize="20sp"
-		    android:text="@string/setting_sound" />
-	    
-	    <View
-	        android:layout_width="150dp"
-	        android:layout_height="0dp" />
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:text="@string/setting_IP"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
 
-	    <CheckBox
-	        android:id="@+id/sound"
-	        android:layout_width="wrap_content"
-	        android:layout_height="70dp" />
-	    
-	</LinearLayout>
-    
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:background="#FFFFFF" />
-    
-    <LinearLayout
-        android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:background="#000000"
-    	android:orientation="horizontal" >
-	    
-        <TextView
-		    android:layout_width="wrap_content"
-		    android:layout_height="70dp"
-		    android:layout_gravity="center_vertical"
-		    android:paddingTop="22dp"
-		    android:paddingLeft="10dp"
-		    android:textColor="#FFFFFF"
-		    android:textSize="20sp"
-		    android:text="@string/setting_LED" />
-        
+        <EditText
+            android:id="@+id/editIP"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:layout_gravity="center_vertical"
+            android:ems="10"
+            android:textColor="#FFFFFF" />
+
         <View
-	        android:layout_width="11dp"
-	        android:layout_height="0dp" />
-    
-	    <CheckBox
-	        android:id="@+id/LED"
-	        android:layout_width="wrap_content"
-	        android:layout_height="70dp"
-	        android:layout_gravity="center_vertical"
-	        android:text="" />
-	    
-	</LinearLayout>
-    
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:background="#FFFFFF" />
-    
-</LinearLayout>
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:background="#FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:text="@string/setting_port"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/editPort"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:layout_gravity="center_vertical"
+            android:ems="10"
+            android:textColor="#FFFFFF" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:background="#FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:text="@string/setting_send_rate"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/editSendRate"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:layout_gravity="center_vertical"
+            android:ems="10"
+            android:textColor="#FFFFFF" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:background="#FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:text="@string/setting_sensitivity"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+
+        <SeekBar
+            android:id="@+id/sensitivity"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:layout_gravity="center_vertical" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:background="#FFFFFF" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#000000"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="70dp"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="20dp"
+                android:text="@string/setting_accelHZ"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+
+            <Spinner
+                android:id="@+id/accelHZ"
+                android:layout_width="wrap_content"
+                android:layout_height="70dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="20dp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:background="#FFFFFF" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#000000"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="70dp"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="22dp"
+                android:text="@string/setting_vibration"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+
+            <View
+                android:layout_width="51dp"
+                android:layout_height="0dp" />
+
+            <CheckBox
+                android:id="@+id/vibration"
+                android:layout_width="wrap_content"
+                android:layout_height="70dp"
+                android:layout_gravity="center_vertical"
+                android:text="" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:background="#FFFFFF" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#000000"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="70dp"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="22dp"
+                android:text="@string/setting_sound"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+
+            <View
+                android:layout_width="150dp"
+                android:layout_height="0dp" />
+
+            <CheckBox
+                android:id="@+id/sound"
+                android:layout_width="wrap_content"
+                android:layout_height="70dp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:background="#FFFFFF" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#000000"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="70dp"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:paddingTop="22dp"
+                android:text="@string/setting_LED"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+
+            <View
+                android:layout_width="11dp"
+                android:layout_height="0dp" />
+
+            <CheckBox
+                android:id="@+id/LED"
+                android:layout_width="wrap_content"
+                android:layout_height="70dp"
+                android:layout_gravity="center_vertical"
+                android:text="" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:background="#FFFFFF" />
+    </LinearLayout>
+
+</ScrollView>

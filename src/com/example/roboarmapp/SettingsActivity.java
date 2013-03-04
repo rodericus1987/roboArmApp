@@ -2,6 +2,7 @@ package com.example.roboarmapp;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
@@ -13,11 +14,18 @@ public class SettingsActivity extends Activity {
 	private static final String[] items={"10Hz", "50Hz", "100Hz"};
 	EditText ipAddress;
 	EditText portText;
+	EditText sendRateText;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
+		ipAddress = (EditText)findViewById(R.id.editIP);
+		ipAddress.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+		portText = (EditText)findViewById(R.id.editPort);
+		portText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+		sendRateText = (EditText)findViewById(R.id.editSendRate);
+		sendRateText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
 		// Show the Up button in the action bar.
 		//getActionBar().setDisplayHomeAsUpEnabled(true);
 		Spinner spin=(Spinner)findViewById(R.id.accelHZ);
@@ -29,10 +37,9 @@ public class SettingsActivity extends Activity {
 	
 	@Override
 	public void onResume() {
-		ipAddress = (EditText)findViewById(R.id.editIP);
 		ipAddress.setText(MainActivity.serverIP);
-		portText = (EditText)findViewById(R.id.editPort);
 		portText.setText(MainActivity.serverPort);
+		sendRateText.setText(MainActivity.period);
 		super.onResume();
 	}
 	
@@ -41,6 +48,7 @@ public class SettingsActivity extends Activity {
 	{
 		MainActivity.serverIP = ipAddress.getText().toString();
 		MainActivity.serverPort = portText.getText().toString();
+		MainActivity.period = sendRateText.getText().toString();
 	    if ((keyCode == KeyEvent.KEYCODE_BACK))
 	    {
 	        finish();
