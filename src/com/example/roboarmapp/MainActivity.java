@@ -54,6 +54,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static Timer myTimer;
 
 	public static boolean aboutToLock;
+	public static int connectingToServer = 0;
 
 	public static String period = "1000"; // # of ms between tcp/ip data send
 
@@ -254,6 +255,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		if (!socketConnected) {
 			myMainButton.setBackgroundColor(Color.YELLOW);
 			myMainButton.setText(R.string.connecting);
+			connectingToServer++;
 			new ConnectToServer().execute();
 		}
 		super.onResume();
@@ -308,32 +310,34 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public class ConnectToServer extends AsyncTask<Void, Void, Void> {
 		@Override
 		protected Void doInBackground(Void... arg0) {
-			Log.d("DEBUG: ", "Before connection");
-
-			try {
-				mySocket = new Socket();
-				mySocket.connect(new InetSocketAddress(serverIP, Integer.parseInt(serverPort)), 1000);
-				out = mySocket.getOutputStream();
-				socketConnected = true;
-				/*
-				 * out.write(1); ObjectOutputStream out = new
-				 * ObjectOutputStream(mySocket.getOutputStream()); DataPacket
-				 * packetToServer = new DataPacket(); packetToServer.x =
-				 * (float)1.1; packetToServer.y = (float)2.2; packetToServer.z =
-				 * (float)3.3; out.writeObject(packetToServer); out.flush();
-				 * out.close();
-				 */
-				Log.d("DEBUG: ", "Tried Connection");
-				// mySocket.close();
-			} catch (IOException e) {
-				Log.e("ERR: ", e.getMessage());
+			if (connectingToServer == 1) {
+				Log.d("DEBUG: ", "Before connection");
+	
+				try {
+					mySocket = new Socket();
+					mySocket.connect(new InetSocketAddress(serverIP, Integer.parseInt(serverPort)), 1000);
+					out = mySocket.getOutputStream();
+					socketConnected = true;
+					/*
+					 * out.write(1); ObjectOutputStream out = new
+					 * ObjectOutputStream(mySocket.getOutputStream()); DataPacket
+					 * packetToServer = new DataPacket(); packetToServer.x =
+					 * (float)1.1; packetToServer.y = (float)2.2; packetToServer.z =
+					 * (float)3.3; out.writeObject(packetToServer); out.flush();
+					 * out.close();
+					 */
+					Log.d("DEBUG: ", "Tried Connection");
+					// mySocket.close();
+				} catch (IOException e) {
+					Log.e("ERR: ", e.getMessage());
+				}
 			}
-
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
+			connectingToServer--;
 			Button myMainButton = (Button) findViewById(R.id.startStopButton);
 			if (!socketConnected) {
 				if ((serverIP == "") || (serverPort == "")) {
@@ -342,9 +346,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 					myMainButton.setText(R.string.connect_error);
 					myMainButton.setOnTouchListener(new OnTouchListener() {
 						public boolean onTouch(View v, MotionEvent event) {
-							Button myMainButton = (Button) findViewById(R.id.startStopButton);
-							myMainButton.setText(R.string.connecting);
-							new ConnectToServer().execute();
+							switch (event.getAction()) {
+							case MotionEvent.ACTION_UP: {
+								Button myMainButton = (Button) findViewById(R.id.startStopButton);
+								myMainButton.setText(R.string.connecting);
+								connectingToServer++;
+								new ConnectToServer().execute();
+							}}
 							return true;
 						}
 					});
@@ -359,6 +367,23 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 						switch (event.getAction()) {
 						case MotionEvent.ACTION_DOWN: {
+							if (!socketConnected) {
+								Button myMainButton = (Button) findViewById(R.id.startStopButton);
+								myMainButton.setText(R.string.connect_error);
+								myMainButton.setBackgroundColor(Color.YELLOW);
+								myMainButton.setOnTouchListener(new OnTouchListener() {
+									public boolean onTouch(View v, MotionEvent event) {
+
+										switch (event.getAction()) {
+										case MotionEvent.ACTION_UP: {
+											connectingToServer++;
+											new ConnectToServer().execute();
+										}}
+										return true;
+									}});
+								return true;
+							}
+
 							buttonIsDown = true;
 							SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
 							gripperBar.setEnabled(false);
@@ -372,6 +397,23 @@ public class MainActivity extends Activity implements SensorEventListener {
 						}
 
 						case MotionEvent.ACTION_UP: {
+							if (!socketConnected) {
+								Button myMainButton = (Button) findViewById(R.id.startStopButton);
+								myMainButton.setText(R.string.connect_error);
+								myMainButton.setBackgroundColor(Color.YELLOW);
+								myMainButton.setOnTouchListener(new OnTouchListener() {
+									public boolean onTouch(View v, MotionEvent event) {
+
+										switch (event.getAction()) {
+										case MotionEvent.ACTION_UP: {
+											connectingToServer++;
+											new ConnectToServer().execute();
+										}}
+										return true;
+									}});
+								return true;
+							}
+							
 							buttonIsDown = false;
 							SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
 							gripperBar.setEnabled(true);
@@ -546,14 +588,13 @@ class doSendTimerTask extends TimerTask {
 					try {
 						MainActivity.out.write(outByteData);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+						MainActivity.socketConnected = false;
 						e.printStackTrace();
 					}
 				}
 				try {
 					MainActivity.out.flush();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
