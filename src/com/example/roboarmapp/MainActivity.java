@@ -334,8 +334,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 			connectingToServer--;
 			Button myMainButton = (Button) findViewById(R.id.startStopButton);
 			if (!socketConnected) {
-				if ((serverIP == "") || (serverPort == "")) {
+				if (serverIP == "") {
 					myMainButton.setText(R.string.no_ip);
+					myMainButton.setOnTouchListener(null);
 				} else {
 					reconnectButtonSet = false;
 				}
@@ -508,7 +509,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		{
 			public void run() 
 			{
-				if ((!socketConnected) && (!reconnectButtonSet)) {
+				if ((!socketConnected) && (!reconnectButtonSet) && (serverIP != "")) {
 					if (sensorsStarted) {
 						stopSensors();
 					}
