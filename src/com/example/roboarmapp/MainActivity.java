@@ -124,7 +124,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
-							// TODO: HOME ROBOT POSITION
+							rollAngle = 0;
+							pitchAngle = 0;
+							grip = 0;
 						}
 					}
 				};
