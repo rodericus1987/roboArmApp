@@ -46,9 +46,9 @@ public class SettingsActivity extends Activity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event)
 	{
-		MainActivity.serverIP = ipAddress.getText().toString();
-		MainActivity.serverPort = portText.getText().toString();
-		MainActivity.period = sendRateText.getText().toString();
+		MainActivity.serverIP = ipAddress.getText().toString().trim();
+		MainActivity.serverPort = portText.getText().toString().trim();
+		MainActivity.period = sendRateText.getText().toString().trim();
 	    if ((keyCode == KeyEvent.KEYCODE_BACK))
 	    {
 	        finish();
@@ -67,9 +67,9 @@ public class SettingsActivity extends Activity {
 			//
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
-			MainActivity.serverIP = ipAddress.getText().toString();
-			MainActivity.serverPort = portText.getText().toString();
-			MainActivity.period = sendRateText.getText().toString();
+			MainActivity.serverIP = ipAddress.getText().toString().trim();
+			MainActivity.serverPort = portText.getText().toString().trim();
+			MainActivity.period = sendRateText.getText().toString().trim();
 			finish();
 			return true;
 		}
