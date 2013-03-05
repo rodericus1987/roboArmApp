@@ -337,19 +337,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 				if ((serverIP == "") || (serverPort == "")) {
 					myMainButton.setText(R.string.no_ip);
 				} else {
-					myMainButton.setText(R.string.connect_error);
-					myMainButton.setOnTouchListener(new OnTouchListener() {
-						public boolean onTouch(View v, MotionEvent event) {
-							switch (event.getAction()) {
-							case MotionEvent.ACTION_UP: {
-								Button myMainButton = (Button) findViewById(R.id.startStopButton);
-								myMainButton.setText(R.string.connecting);
-								connectingToServer++;
-								new ConnectToServer().execute();
-							}}
-							return true;
-						}
-					});
+					reconnectButtonSet = false;
 				}
 			} else {
 				reconnectButtonSet = false;
@@ -533,6 +521,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 						public boolean onTouch(View v, MotionEvent event) {
 							switch (event.getAction()) {
 							case MotionEvent.ACTION_UP: {
+								Button myMainButton = (Button) findViewById(R.id.startStopButton);
+								myMainButton.setText(R.string.connecting);
 								connectingToServer++;
 								new ConnectToServer().execute();
 							}}
