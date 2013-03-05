@@ -27,6 +27,7 @@ import android.hardware.SensorManager;
 import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,6 +55,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static Timer myTimer;
 
 	public static boolean aboutToLock;
+	public static boolean sensorsStarted = false;
+	public static boolean reconnectButtonSet = false;
 	public static int connectingToServer = 0;
 
 	public static String period = "1000"; // # of ms between tcp/ip data send
@@ -64,26 +67,30 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private Sensor mAccelerometer, mOrientation, mGyroscope, mRotation;
 	private boolean reference;
 	private static final float NS2S = 1.0f / 1000000000.0f;
-	public static float[] prevSentDataVector;
 	public static float[] rotationVector;
 	public static float[] rotationMatrix;
 	public static float[] acceleration;
 	public static float[] speed;
-	public static float[] displacement = new float [3];
+	public static float[] displacement;
 	public static float rollAngle = 0;
 	public static float pitchAngle = 0;
 	private float referenceRoll;
 	private float referencePitch;
-	public static float grip;
+	public static float grip = 0.0f;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		prevSentDataVector = new float[6];
-		for (int i = 0; i < 0; i++) {
-			prevSentDataVector[i] = 0.0f;
+		displacement = new float[3];
+		for (int i = 0; i < 3; i++) {
+			displacement[i] = 0.0f;
+		}
+
+		speed = new float[3];
+		for (int i = 0; i < 3; i++) {
+			speed[i] = 0.0f;
 		}
 
 		// check for settings file
@@ -153,6 +160,17 @@ public class MainActivity extends Activity implements SensorEventListener {
 				// doSend(outFloatData);
 			}
 		});
+
+		final Handler handler = new Handler();
+		final Runnable r = new Runnable()
+		{
+			public void run() 
+			{
+				checkConnectionStatus();
+				handler.postDelayed(this, 1000);
+			}
+		};
+		handler.postDelayed(r, 1000);
 	}
 
 	private void moveRobotArm(long pressTime) {
@@ -186,6 +204,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@SuppressWarnings("deprecation")
 	public void startSensors() {
+		sensorsStarted = false;
 		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		mAccelerometer = mSensorManager
 				.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
@@ -203,11 +222,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 		rotationVector = new float [3];
 		acceleration = new float [4];
-		speed = new float [3];
-		displacement = new float [3];
-		for (int i = 0; i < 3; i++) {
-			displacement[i] = 0.0f;
-		}
 		lastMeasurement1 = System.nanoTime();
 		lastMeasurement2 = System.nanoTime();
 		reference = true;
@@ -216,20 +230,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	}
 
 	public void stopSensors() {
+		sensorsStarted = false;
 		mSensorManager.unregisterListener(this);
 	}
-
-	/*
-	 * public void doSend(float[] outFloatData) { for (int i = 0; i <
-	 * outFloatData.length; i++) { int data =
-	 * Float.floatToRawIntBits(outFloatData[i]); byte outByteData[] = new
-	 * byte[4]; outByteData[3] = (byte) (data >> 24); outByteData[2] = (byte)
-	 * (data >> 16); outByteData[1] = (byte) (data >> 8); outByteData[0] =
-	 * (byte) (data); try { out.write(outByteData); } catch (IOException e) { //
-	 * TODO Auto-generated catch block e.printStackTrace(); } } try {
-	 * out.flush(); } catch (IOException e) { // TODO Auto-generated catch block
-	 * e.printStackTrace(); } }
-	 */
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -247,9 +250,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onResume() {
-		myTimer = new Timer();
-		doSendTimerTask myTask = new doSendTimerTask();
-		myTimer.schedule(myTask, 1000, Integer.parseInt(period));
 		aboutToLock = false;
 		Button myMainButton = (Button) findViewById(R.id.startStopButton);
 		if (!socketConnected) {
@@ -258,6 +258,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 			connectingToServer++;
 			new ConnectToServer().execute();
 		}
+		myTimer = new Timer();
+		doSendTimerTask myTask = new doSendTimerTask();
+		myTimer.schedule(myTask, 0, Integer.parseInt(period));
 		super.onResume();
 	}
 
@@ -312,22 +315,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 		protected Void doInBackground(Void... arg0) {
 			if (connectingToServer == 1) {
 				Log.d("DEBUG: ", "Before connection");
-	
+
 				try {
 					mySocket = new Socket();
 					mySocket.connect(new InetSocketAddress(serverIP, Integer.parseInt(serverPort)), 1000);
 					out = mySocket.getOutputStream();
 					socketConnected = true;
-					/*
-					 * out.write(1); ObjectOutputStream out = new
-					 * ObjectOutputStream(mySocket.getOutputStream()); DataPacket
-					 * packetToServer = new DataPacket(); packetToServer.x =
-					 * (float)1.1; packetToServer.y = (float)2.2; packetToServer.z =
-					 * (float)3.3; out.writeObject(packetToServer); out.flush();
-					 * out.close();
-					 */
 					Log.d("DEBUG: ", "Tried Connection");
-					// mySocket.close();
 				} catch (IOException e) {
 					Log.e("ERR: ", e.getMessage());
 				}
@@ -358,6 +352,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					});
 				}
 			} else {
+				reconnectButtonSet = false;
 				myMainButton.setBackgroundColor(Color.GREEN);
 				myMainButton.setText(R.string.start_stop);
 
@@ -367,25 +362,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 						switch (event.getAction()) {
 						case MotionEvent.ACTION_DOWN: {
-							if (!socketConnected) {
-								SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
-								gripperBar.setEnabled(true);
-								Button myMainButton = (Button) findViewById(R.id.startStopButton);
-								myMainButton.setText(R.string.connect_error);
-								myMainButton.setBackgroundColor(Color.YELLOW);
-								myMainButton.setOnTouchListener(new OnTouchListener() {
-									public boolean onTouch(View v, MotionEvent event) {
-
-										switch (event.getAction()) {
-										case MotionEvent.ACTION_UP: {
-											connectingToServer++;
-											new ConnectToServer().execute();
-										}}
-										return true;
-									}});
-								return true;
-							}
-
 							buttonIsDown = true;
 							SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
 							gripperBar.setEnabled(false);
@@ -399,25 +375,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 						}
 
 						case MotionEvent.ACTION_UP: {
-							if (!socketConnected) {
-								SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
-								gripperBar.setEnabled(true);
-								Button myMainButton = (Button) findViewById(R.id.startStopButton);
-								myMainButton.setText(R.string.connect_error);
-								myMainButton.setBackgroundColor(Color.YELLOW);
-								myMainButton.setOnTouchListener(new OnTouchListener() {
-									public boolean onTouch(View v, MotionEvent event) {
-
-										switch (event.getAction()) {
-										case MotionEvent.ACTION_UP: {
-											connectingToServer++;
-											new ConnectToServer().execute();
-										}}
-										return true;
-									}});
-								return true;
-							}
-							
 							buttonIsDown = false;
 							SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
 							gripperBar.setEnabled(true);
@@ -556,51 +513,70 @@ public class MainActivity extends Activity implements SensorEventListener {
 			// Math.PI) + "; The expected roll is " + (diffPitch + rollAngle *
 			// 360 / 2 / Math.PI));
 		}
+	}
 
+	protected void checkConnectionStatus() {
+		runOnUiThread(new Runnable() 
+		{
+			public void run() 
+			{
+				if ((!socketConnected) && (!reconnectButtonSet)) {
+					if (sensorsStarted) {
+						stopSensors();
+					}
+					SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
+					gripperBar.setEnabled(true);
+					Button myMainButton = (Button) findViewById(R.id.startStopButton);
+					myMainButton.setText(R.string.connect_error);
+					myMainButton.setBackgroundColor(Color.YELLOW);
+					myMainButton.setOnTouchListener(new OnTouchListener() {
+						public boolean onTouch(View v, MotionEvent event) {
+							switch (event.getAction()) {
+							case MotionEvent.ACTION_UP: {
+								connectingToServer++;
+								new ConnectToServer().execute();
+							}}
+							return true;
+						}});
+					reconnectButtonSet = true;
+				}
+			}
+		});
 	}
 }
 
 class doSendTimerTask extends TimerTask {
 	public void run() {
 		if (MainActivity.socketConnected) {
-			float[] outFloatData = { MainActivity.rollAngle,
-					MainActivity.pitchAngle, MainActivity.displacement[0], MainActivity.displacement[1], MainActivity.displacement[2], MainActivity.grip };
-			boolean dataHasChanged = false;
+			float[] outFloatData = { MainActivity.rollAngle, MainActivity.pitchAngle, MainActivity.displacement[0], MainActivity.displacement[1], MainActivity.displacement[2], MainActivity.grip };
+
+			MainActivity.displacement[0] = 0.0f;
+			MainActivity.displacement[1] = 0.0f;
+			MainActivity.displacement[2] = 0.0f;
+			MainActivity.speed[0] = 0.0f;
+			MainActivity.speed[1] = 0.0f;
+			MainActivity.speed[2] = 0.0f;
+
+
 			for (int i = 0; i < outFloatData.length; i++) {
-				if (outFloatData[i] != MainActivity.prevSentDataVector[i]) {
-					dataHasChanged = true;
-					break;
-				}
-			}
-			if (dataHasChanged) {
-				MainActivity.displacement[0] = 0.0f;
-				MainActivity.displacement[1] = 0.0f;
-				MainActivity.displacement[2] = 0.0f;
-				MainActivity.speed[0] = 0.0f;
-				MainActivity.speed[1] = 0.0f;
-				MainActivity.speed[2] = 0.0f;
-
-
-				for (int i = 0; i < outFloatData.length; i++) {
-					MainActivity.prevSentDataVector[i] = outFloatData[i];
-					int data = Float.floatToRawIntBits(outFloatData[i]);
-					byte outByteData[] = new byte[4];
-					outByteData[3] = (byte) (data >> 24);
-					outByteData[2] = (byte) (data >> 16);
-					outByteData[1] = (byte) (data >> 8);
-					outByteData[0] = (byte) (data);
-					try {
-						MainActivity.out.write(outByteData);
-					} catch (IOException e) {
-						MainActivity.socketConnected = false;
-						e.printStackTrace();
-					}
-				}
+				int data = Float.floatToRawIntBits(outFloatData[i]);
+				byte outByteData[] = new byte[4];
+				outByteData[3] = (byte) (data >> 24);
+				outByteData[2] = (byte) (data >> 16);
+				outByteData[1] = (byte) (data >> 8);
+				outByteData[0] = (byte) (data);
 				try {
-					MainActivity.out.flush();
+					MainActivity.out.write(outByteData);
 				} catch (IOException e) {
+					MainActivity.socketConnected = false;
 					e.printStackTrace();
 				}
+			}
+			try {
+				MainActivity.out.flush();
+			} catch (IOException e) {
+				MainActivity.socketConnected = false;
+				e.printStackTrace();
 			}
 		}
 	}
