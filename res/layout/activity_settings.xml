@@ -23,6 +23,8 @@
             android:id="@+id/editIP"
             android:layout_width="match_parent"
             android:layout_height="35dp"
+            android:singleLine="true"
+    		android:lines="1"
             android:layout_gravity="center_vertical"
             android:ems="10"
             android:textColor="#FFFFFF" />
@@ -45,6 +47,8 @@
             android:id="@+id/editPort"
             android:layout_width="match_parent"
             android:layout_height="35dp"
+            android:singleLine="true"
+    		android:lines="1"
             android:layout_gravity="center_vertical"
             android:ems="10"
             android:textColor="#FFFFFF" />
@@ -67,6 +71,8 @@
             android:id="@+id/editSendRate"
             android:layout_width="match_parent"
             android:layout_height="35dp"
+            android:singleLine="true"
+    		android:lines="1"
             android:layout_gravity="center_vertical"
             android:ems="10"
             android:textColor="#FFFFFF" />
