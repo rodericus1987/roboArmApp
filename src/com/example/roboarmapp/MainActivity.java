@@ -54,10 +54,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static boolean socketConnected = false;
 	public static Timer myTimer;
 
-	public static boolean aboutToLock;
 	public static boolean sensorsStarted = false;
 	public static boolean reconnectButtonSet = false;
-	public static int connectingToServer = 0;
+	public static boolean serverSettingsChanged = false;
 
 	public static String period = "1000"; // # of ms between tcp/ip data send
 
@@ -127,6 +126,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 							rollAngle = 0;
 							pitchAngle = 0;
 							grip = 0;
+							SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
+							gripperBar.setProgress(0);
 						}
 					}
 				};
@@ -199,41 +200,44 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	/** Called when the user clicks the Lock Axis button */
 	public void lockAxis(View view) {
-		aboutToLock = true;
 		Intent intent = new Intent(this, LockAxis.class);
 		startActivity(intent);
 	}
 
 	@SuppressWarnings("deprecation")
 	public void startSensors() {
-		sensorsStarted = false;
-		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-		mAccelerometer = mSensorManager
-				.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-		mOrientation = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
-		mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-		mRotation = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-		mSensorManager.registerListener(this, mAccelerometer,
-				SensorManager.SENSOR_DELAY_NORMAL);
-		mSensorManager.registerListener(this, mOrientation,
-				SensorManager.SENSOR_DELAY_NORMAL);
-		mSensorManager.registerListener(this, mGyroscope,
-				SensorManager.SENSOR_DELAY_NORMAL);
-		mSensorManager.registerListener(this, mRotation,
-				SensorManager.SENSOR_DELAY_NORMAL);
-
-		rotationVector = new float [3];
-		acceleration = new float [4];
-		lastMeasurement1 = System.nanoTime();
-		lastMeasurement2 = System.nanoTime();
-		reference = true;
-		// rollAngle = 0;
-		// pitchAngle = 0;
+		if (!sensorsStarted) {
+			sensorsStarted = true;
+			mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+			mAccelerometer = mSensorManager
+					.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+			mOrientation = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+			mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+			mRotation = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+			mSensorManager.registerListener(this, mAccelerometer,
+					SensorManager.SENSOR_DELAY_NORMAL);
+			mSensorManager.registerListener(this, mOrientation,
+					SensorManager.SENSOR_DELAY_NORMAL);
+			mSensorManager.registerListener(this, mGyroscope,
+					SensorManager.SENSOR_DELAY_NORMAL);
+			mSensorManager.registerListener(this, mRotation,
+					SensorManager.SENSOR_DELAY_NORMAL);
+	
+			rotationVector = new float [3];
+			acceleration = new float [4];
+			lastMeasurement1 = System.nanoTime();
+			lastMeasurement2 = System.nanoTime();
+			reference = true;
+			// rollAngle = 0;
+			// pitchAngle = 0;
+		}
 	}
 
 	public void stopSensors() {
-		sensorsStarted = false;
-		mSensorManager.unregisterListener(this);
+		if (sensorsStarted) {
+			sensorsStarted = false;
+			mSensorManager.unregisterListener(this);
+		}
 	}
 
 	@Override
@@ -252,17 +256,33 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onResume() {
-		aboutToLock = false;
 		Button myMainButton = (Button) findViewById(R.id.startStopButton);
+		
+		if (serverSettingsChanged) {
+			serverSettingsChanged = false;
+			try {
+				if (socketConnected) {
+					socketConnected = false;
+					out.flush();
+					out.close();
+					mySocket.close();
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		if (!socketConnected) {
 			myMainButton.setBackgroundColor(Color.YELLOW);
 			myMainButton.setText(R.string.connecting);
-			connectingToServer++;
 			new ConnectToServer().execute();
 		}
+		
 		myTimer = new Timer();
 		doSendTimerTask myTask = new doSendTimerTask();
 		myTimer.schedule(myTask, 0, Integer.parseInt(period));
+		
 		super.onResume();
 	}
 
@@ -270,17 +290,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public void onPause() {
 		myTimer.cancel();
 		myTimer.purge();
-		try {
-			if ((socketConnected) && (!aboutToLock)) {
-				socketConnected = false;
-				out.flush();
-				out.close();
-				mySocket.close();
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		super.onPause();
 	}
 
@@ -309,31 +318,45 @@ public class MainActivity extends Activity implements SensorEventListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		super.onStop();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		try {
+			if (socketConnected) {
+				socketConnected = false;
+				out.flush();
+				out.close();
+				mySocket.close();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		super.onDestroy();
 	}
 
 	public class ConnectToServer extends AsyncTask<Void, Void, Void> {
 		@Override
 		protected Void doInBackground(Void... arg0) {
-			if (connectingToServer == 1) {
-				Log.d("DEBUG: ", "Before connection");
+			Log.d("DEBUG: ", "Before connection");
 
-				try {
-					mySocket = new Socket();
-					mySocket.connect(new InetSocketAddress(serverIP, Integer.parseInt(serverPort)), 1000);
-					out = mySocket.getOutputStream();
-					socketConnected = true;
-					Log.d("DEBUG: ", "Tried Connection");
-				} catch (IOException e) {
-					Log.e("ERR: ", e.getMessage());
-				}
+			try {
+				mySocket = new Socket();
+				mySocket.connect(new InetSocketAddress(serverIP, Integer.parseInt(serverPort)), 1000);
+				out = mySocket.getOutputStream();
+				socketConnected = true;
+				Log.d("DEBUG: ", "Tried Connection");
+			} catch (IOException e) {
+				Log.e("ERR: ", e.getMessage());
 			}
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			connectingToServer--;
 			Button myMainButton = (Button) findViewById(R.id.startStopButton);
 			if (!socketConnected) {
 				if (serverIP == "") {
@@ -512,9 +535,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			public void run() 
 			{
 				if ((!socketConnected) && (!reconnectButtonSet) && (serverIP != "")) {
-					if (sensorsStarted) {
-						stopSensors();
-					}
+					stopSensors();
 					SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
 					gripperBar.setEnabled(true);
 					Button myMainButton = (Button) findViewById(R.id.startStopButton);
@@ -526,8 +547,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 							case MotionEvent.ACTION_UP: {
 								Button myMainButton = (Button) findViewById(R.id.startStopButton);
 								myMainButton.setText(R.string.connecting);
-								connectingToServer++;
 								new ConnectToServer().execute();
+								myMainButton.setOnTouchListener(null);
 							}}
 							return true;
 						}});

@@ -12,6 +12,7 @@ import android.widget.Spinner;
 public class SettingsActivity extends Activity {
 	
 	private static final String[] items={"10Hz", "50Hz", "100Hz"};
+	public static String prevIP, prevPort;
 	EditText ipAddress;
 	EditText portText;
 	EditText sendRateText;
@@ -26,6 +27,10 @@ public class SettingsActivity extends Activity {
 		portText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
 		sendRateText = (EditText)findViewById(R.id.editSendRate);
 		sendRateText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+		
+		prevIP = MainActivity.serverIP;
+		prevPort = MainActivity.serverPort;
+		
 		// Show the Up button in the action bar.
 		//getActionBar().setDisplayHomeAsUpEnabled(true);
 		Spinner spin=(Spinner)findViewById(R.id.accelHZ);
@@ -76,5 +81,9 @@ public class SettingsActivity extends Activity {
 		MainActivity.serverIP = ipAddress.getText().toString().trim();
 		MainActivity.serverPort = portText.getText().toString().trim();
 		MainActivity.period = sendRateText.getText().toString().trim();
+		
+		if ((!prevIP.equals(MainActivity.serverIP)) || (!prevPort.equals(MainActivity.serverPort))) {
+			MainActivity.serverSettingsChanged = true;
+		}
 	}
 }
