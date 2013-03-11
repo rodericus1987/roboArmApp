@@ -78,6 +78,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static float[] rotationVector;
 	public static float[] rotationMatrix;
 	public static float[] acceleration;
+	public static float[] previous_speed;
 	public static float[] speed;
 	public static float[] displacement;
 	public static float rollAngle = 0;
@@ -99,8 +100,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 		}
 
 		speed = new float[3];
+		previous_speed = new float [3];
 		for (int i = 0; i < 3; i++) {
 			speed[i] = 0.0f;
+			previous_speed[i] = 0.0f;
 		}
 		
 		v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -333,8 +336,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 		protected Void doInBackground(Void... arg0) {
 			if (socketConnected) {
 				try {
-					in.read();
-					v1.vibrate(500);
+					int inVal = in.read();
+					if (inVal != -1) {
+						v1.vibrate(500);
+					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -480,10 +485,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 				pitch = (float) (pitch * timeInterval * NS2S);
 				pitchAngle = pitchAngle + pitch;
 			}
-			/*
-			 * Log.d("DEBUG: ", "The current roll value is " + rollAngle * 360 /
-			 * 2 / Math.PI);
-			 */
+			
+			Log.d("CHECK: ", "The current roll value is " + rollAngle * 360 /
+			 2 / Math.PI);
+			 
 			// float[] outFloatData = { rollAngle, pitchAngle, 0, 0, 0, grip };
 			// doSend(outFloatData);
 		}
@@ -501,23 +506,42 @@ public class MainActivity extends Activity implements SensorEventListener {
 			SensorManager.getRotationMatrixFromVector(temp, rotationVector);
 			Matrix.invertM(rotationMatrix, 0, temp, 0);
 			Matrix.multiplyMV(acceleration, 0, rotationMatrix, 0, rawLinear, 0);
-			Log.d("CHECK:", "x = " + acceleration[0] + "; y = " + acceleration[1] + "; z = " + acceleration[2]);
+			//Log.d("CHECK:", "x = " + acceleration[0] + "; y = " + acceleration[1] + "; z = " + acceleration[2]);
 			long timeInterval = event.timestamp - lastMeasurement1;
 			lastMeasurement1 = event.timestamp;
 
 			if (!xAxisLocked) {
 				speed[0] = (float) (acceleration[0] * timeInterval * NS2S) + speed[0];
+				if (speed[0] > 0 && previous_speed[0] < 0) {
+					speed[0] = 0;
+				}
+				else if (speed[0] < 0 && previous_speed[0] > 0) {
+					speed[0] = 0;
+				}
 				displacement[0] = (float) (speed[0] * timeInterval * NS2S) + displacement[0];
 			}
 
 			if (!yAxisLocked) {
 				speed[1] = (float) (acceleration[1] * timeInterval * NS2S) + speed[1];
+				if (speed[1] > 0 && previous_speed[1] < 0) {
+					speed[1] = 0;
+				}
+				else if (speed[1] < 0 && previous_speed[1] > 0) {
+					speed[1] = 0;
+				}
 				displacement[1] = (float) (speed[1] * timeInterval * NS2S) + displacement[1];
 			}
 
 			if (!zAxisLocked) {
 				speed[2] = (float) (acceleration[2] * timeInterval * NS2S) + speed[2];
-				displacement[2] = (float) (speed[2] * timeInterval * NS2S) + displacement[2];				
+				if (speed[2] > 0 && previous_speed[2] < 0) {
+					speed[2] = 0;
+				}
+				else if (speed[2] < 0 && previous_speed[2] > 0) {
+					speed[2] = 0;
+				}
+				displacement[2] = (float) (speed[2] * timeInterval * NS2S) + displacement[2];
+				previous_speed = speed;
 			}
 			//Log.d("CHECK:", "x = " + displacement[0] + "; y = " + displacement[1] + "; z = " + displacement[2]);
 		}
@@ -563,7 +587,8 @@ class doSendTimerTask extends TimerTask {
 	public void run() {
 		if (MainActivity.socketConnected) {
 			float[] outFloatData = { MainActivity.rollAngle, MainActivity.pitchAngle, MainActivity.displacement[0], MainActivity.displacement[1], MainActivity.displacement[2], MainActivity.grip };
-
+			//Log.d("CHECK:", "x = " + MainActivity.displacement[0] + "; y = " + MainActivity.displacement[1] + "; z = " + MainActivity.displacement[2]);
+			
 			MainActivity.displacement[0] = 0.0f;
 			MainActivity.displacement[1] = 0.0f;
 			MainActivity.displacement[2] = 0.0f;
