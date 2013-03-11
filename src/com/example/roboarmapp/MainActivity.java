@@ -24,10 +24,14 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,6 +57,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static OutputStream out;
 	public static boolean socketConnected = false;
 	public static Timer myTimer;
+	public static boolean doVibrate = true;
+	public static boolean doBeep = true;
 
 	public static boolean sensorsStarted = false;
 	public static boolean reconnectButtonSet = false;
@@ -151,16 +157,21 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 			@Override
 			public void onStartTrackingTouch(SeekBar arg0) {
-				// TODO Auto-generated method stub
-
+				// Vibrate for 50 milliseconds
+				if (doVibrate) {
+					Vibrator v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+					v1.vibrate(50);
+				}
 			}
 
 			@Override
 			public void onStopTrackingTouch(SeekBar arg0) {
 				Log.d("CHECK:", "Current progress is " + grip);
-				// float[] outFloatData = { rollAngle, pitchAngle, 0, 0, 0, grip
-				// };
-				// doSend(outFloatData);
+				// Vibrate for 25 milliseconds
+				if (doVibrate) {
+					Vibrator v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+					v1.vibrate(25);
+				}
 			}
 		});
 
@@ -176,20 +187,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 		handler.postDelayed(r, 1000);
 	}
 
-	private void moveRobotArm(long pressTime) {
+	private void setOnMainButton() {
 		Button myMainButton = (Button) findViewById(R.id.startStopButton);
-		// wait two seconds before starting
-		/*
-		 * while ((System.currentTimeMillis() - pressTime) < 2000) { // DO
-		 * NOTHING }
-		 */
 		myMainButton.setBackgroundColor(Color.RED);
 		myMainButton.setText(R.string.release_to_stop);
-		/*
-		 * while (buttonIsDown) { // DO MAIN ARM MOVEMENTS }
-		 * myMainButton.setBackgroundColor(Color.GREEN);
-		 */
-		// myMainButton.setText("@string/start_stop");
 	}
 
 	private void resetMainButton() {
@@ -384,7 +385,23 @@ public class MainActivity extends Activity implements SensorEventListener {
 							homeButton.setEnabled(false);
 							lockButton.setEnabled(false);
 							startSensors();
-							moveRobotArm(System.currentTimeMillis());
+							setOnMainButton();
+							
+							// Vibrate for 150 milliseconds
+							if (doVibrate) {
+								Vibrator v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+								v1.vibrate(150);
+							}
+							
+							// beep
+							if (doBeep) {
+								try {
+							        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+							        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+							        r.play();
+							    } catch (Exception e) {}
+							}
+							
 							return true;
 						}
 
@@ -398,6 +415,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 							lockButton.setEnabled(true);
 							stopSensors();
 							resetMainButton();
+							
+							// Vibrate for 50 milliseconds
+							if (doVibrate) {
+								Vibrator v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+								v1.vibrate(50);
+							}
+							
 							return true;
 						}
 
