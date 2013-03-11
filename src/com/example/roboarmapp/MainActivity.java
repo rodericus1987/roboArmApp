@@ -44,7 +44,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class MainActivity extends Activity implements SensorEventListener {
 
-	private static boolean buttonIsDown;
 	public static boolean xAxisLocked = false;
 	public static boolean yAxisLocked = false;
 	public static boolean zAxisLocked = false;
@@ -112,7 +111,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 		File fileTest = getFileStreamPath("settings.txt");
 		if (fileTest.exists()) {
 			try {
-				int counter = 0;
 				String entryDelims = "[|]";
 				FileInputStream in = openFileInput("settings.txt");
 				InputStreamReader inputStreamReader = new InputStreamReader(in);
@@ -416,7 +414,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 								v1.vibrate(50);
 							}
 							
-							buttonIsDown = true;
 							gripperBar.setEnabled(false);
 							Button homeButton = (Button) findViewById(R.id.homeButton);
 							Button lockButton = (Button) findViewById(R.id.lockButton);
@@ -430,7 +427,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 						case MotionEvent.ACTION_UP: {
 							
-							buttonIsDown = false;
 							gripperBar.setEnabled(true);
 							Button homeButton = (Button) findViewById(R.id.homeButton);
 							Button lockButton = (Button) findViewById(R.id.lockButton);

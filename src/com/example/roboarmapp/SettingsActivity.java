@@ -13,15 +13,12 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 public class SettingsActivity extends Activity {
 	
-	private static final String[] items={"10Hz", "50Hz", "100Hz"};
 	public static String prevIP, prevPort, prevPeriod;
 	EditText ipAddress;
 	EditText portText;
@@ -106,11 +103,6 @@ public class SettingsActivity extends Activity {
 		
 		// Show the Up button in the action bar.
 		//getActionBar().setDisplayHomeAsUpEnabled(true);
-		Spinner spin=(Spinner)findViewById(R.id.accelHZ);
-		//spin.setOnItemSelectedListener(this);
-		ArrayAdapter<String> aa=new ArrayAdapter<String>(this, R.layout.simple_spinner_item,items);
-		aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spin.setAdapter(aa);
 	}
 	
 	@Override
@@ -139,7 +131,6 @@ public class SettingsActivity extends Activity {
 		}
 		try {
 			FileOutputStream out = openFileOutput("settings.txt", Context.MODE_PRIVATE);
-			int i;
 			String entry = "";
 			entry += MainActivity.serverIP;
 			entry += "|";

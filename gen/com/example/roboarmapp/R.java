@@ -26,8 +26,6 @@ public final class R {
         public static final int white_axis_dbl=0x7f02000c;
     }
     public static final class id {
-        public static final int LED=0x7f080019;
-        public static final int accelHZ=0x7f080014;
         public static final int axis=0x7f080000;
         public static final int doneButton=0x7f080004;
         public static final int editIP=0x7f080010;
@@ -44,15 +42,15 @@ public final class R {
         public static final int lockXAxis=0x7f080003;
         public static final int lockYAxis=0x7f080002;
         public static final int lockZAxis=0x7f080001;
-        public static final int menu_settings=0x7f08001a;
+        public static final int menu_settings=0x7f080018;
         public static final int pitch=0x7f080007;
         public static final int roll=0x7f080005;
         public static final int sensitivity=0x7f080013;
-        public static final int sound=0x7f080018;
-        public static final int sound_text=0x7f080017;
+        public static final int sound=0x7f080017;
+        public static final int sound_text=0x7f080016;
         public static final int startStopButton=0x7f080009;
-        public static final int vibration=0x7f080016;
-        public static final int vibration_text=0x7f080015;
+        public static final int vibration=0x7f080015;
+        public static final int vibration_text=0x7f080014;
     }
     public static final class layout {
         public static final int activity_lock_axis=0x7f030000;
