@@ -26,33 +26,33 @@ public final class R {
         public static final int white_axis_dbl=0x7f02000c;
     }
     public static final class id {
-        public static final int LED=0x7f070019;
-        public static final int accelHZ=0x7f070014;
-        public static final int axis=0x7f070000;
-        public static final int doneButton=0x7f070004;
-        public static final int editIP=0x7f070010;
-        public static final int editPort=0x7f070011;
-        public static final int editSendRate=0x7f070012;
-        public static final int gripperBar=0x7f07000f;
-        public static final int gripperClosed=0x7f07000e;
-        public static final int gripperOpen=0x7f07000d;
-        public static final int gripperText=0x7f07000c;
-        public static final int homeButton=0x7f07000a;
-        public static final int lockButton=0x7f07000b;
-        public static final int lockPitch=0x7f070008;
-        public static final int lockRoll=0x7f070006;
-        public static final int lockXAxis=0x7f070003;
-        public static final int lockYAxis=0x7f070002;
-        public static final int lockZAxis=0x7f070001;
-        public static final int menu_settings=0x7f07001a;
-        public static final int pitch=0x7f070007;
-        public static final int roll=0x7f070005;
-        public static final int sensitivity=0x7f070013;
-        public static final int sound=0x7f070018;
-        public static final int sound_text=0x7f070017;
-        public static final int startStopButton=0x7f070009;
-        public static final int vibration=0x7f070016;
-        public static final int vibration_text=0x7f070015;
+        public static final int LED=0x7f080019;
+        public static final int accelHZ=0x7f080014;
+        public static final int axis=0x7f080000;
+        public static final int doneButton=0x7f080004;
+        public static final int editIP=0x7f080010;
+        public static final int editPort=0x7f080011;
+        public static final int editSendRate=0x7f080012;
+        public static final int gripperBar=0x7f08000f;
+        public static final int gripperClosed=0x7f08000e;
+        public static final int gripperOpen=0x7f08000d;
+        public static final int gripperText=0x7f08000c;
+        public static final int homeButton=0x7f08000a;
+        public static final int lockButton=0x7f08000b;
+        public static final int lockPitch=0x7f080008;
+        public static final int lockRoll=0x7f080006;
+        public static final int lockXAxis=0x7f080003;
+        public static final int lockYAxis=0x7f080002;
+        public static final int lockZAxis=0x7f080001;
+        public static final int menu_settings=0x7f08001a;
+        public static final int pitch=0x7f080007;
+        public static final int roll=0x7f080005;
+        public static final int sensitivity=0x7f080013;
+        public static final int sound=0x7f080018;
+        public static final int sound_text=0x7f080017;
+        public static final int startStopButton=0x7f080009;
+        public static final int vibration=0x7f080016;
+        public static final int vibration_text=0x7f080015;
     }
     public static final class layout {
         public static final int activity_lock_axis=0x7f030000;
@@ -61,41 +61,44 @@ public final class R {
         public static final int simple_spinner_item=0x7f030003;
     }
     public static final class menu {
-        public static final int activity_lock_axis=0x7f060000;
-        public static final int activity_main=0x7f060001;
-        public static final int activity_settings=0x7f060002;
+        public static final int activity_lock_axis=0x7f070000;
+        public static final int activity_main=0x7f070001;
+        public static final int activity_settings=0x7f070002;
+    }
+    public static final class raw {
+        public static final int robot_blip=0x7f040000;
     }
     public static final class string {
-        public static final int app_name=0x7f040000;
-        public static final int cancel=0x7f04000a;
-        public static final int close_gripper=0x7f040013;
-        public static final int connect_error=0x7f040006;
-        public static final int connecting=0x7f040005;
-        public static final int done_button=0x7f040014;
-        public static final int gripper_control=0x7f040011;
-        public static final int home_dialog_message=0x7f040007;
-        public static final int home_dialog_title=0x7f040008;
-        public static final int lock_pitch=0x7f040010;
-        public static final int lock_roll=0x7f04000f;
-        public static final int lock_x=0x7f04000d;
-        public static final int lock_y=0x7f04000e;
-        public static final int lock_z=0x7f04000c;
-        public static final int menu_settings=0x7f040001;
-        public static final int no_ip=0x7f040004;
-        public static final int open_gripper=0x7f040012;
-        public static final int proceed=0x7f040009;
-        public static final int release_to_stop=0x7f040003;
-        public static final int setting_IP=0x7f040016;
-        public static final int setting_LED=0x7f04001c;
-        public static final int setting_accelHZ=0x7f04001d;
-        public static final int setting_port=0x7f040017;
-        public static final int setting_send_rate=0x7f040018;
-        public static final int setting_sensitivity=0x7f040019;
-        public static final int setting_sound=0x7f04001b;
-        public static final int setting_vibration=0x7f04001a;
-        public static final int start_stop=0x7f040002;
-        public static final int title_activity_lock_axis=0x7f04000b;
-        public static final int title_activity_settings=0x7f040015;
+        public static final int app_name=0x7f050000;
+        public static final int cancel=0x7f05000a;
+        public static final int close_gripper=0x7f050013;
+        public static final int connect_error=0x7f050006;
+        public static final int connecting=0x7f050005;
+        public static final int done_button=0x7f050014;
+        public static final int gripper_control=0x7f050011;
+        public static final int home_dialog_message=0x7f050007;
+        public static final int home_dialog_title=0x7f050008;
+        public static final int lock_pitch=0x7f050010;
+        public static final int lock_roll=0x7f05000f;
+        public static final int lock_x=0x7f05000d;
+        public static final int lock_y=0x7f05000e;
+        public static final int lock_z=0x7f05000c;
+        public static final int menu_settings=0x7f050001;
+        public static final int no_ip=0x7f050004;
+        public static final int open_gripper=0x7f050012;
+        public static final int proceed=0x7f050009;
+        public static final int release_to_stop=0x7f050003;
+        public static final int setting_IP=0x7f050016;
+        public static final int setting_LED=0x7f05001c;
+        public static final int setting_accelHZ=0x7f05001d;
+        public static final int setting_port=0x7f050017;
+        public static final int setting_send_rate=0x7f050018;
+        public static final int setting_sensitivity=0x7f050019;
+        public static final int setting_sound=0x7f05001b;
+        public static final int setting_vibration=0x7f05001a;
+        public static final int start_stop=0x7f050002;
+        public static final int title_activity_lock_axis=0x7f05000b;
+        public static final int title_activity_settings=0x7f050015;
     }
     public static final class style {
         /** 
@@ -119,10 +122,10 @@ public final class R {
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f050000;
+        public static final int AppBaseTheme=0x7f060000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f050001;
+        public static final int AppTheme=0x7f060001;
     }
 }

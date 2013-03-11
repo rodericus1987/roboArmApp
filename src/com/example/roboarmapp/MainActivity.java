@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -24,9 +23,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnPreparedListener;
 import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -364,11 +363,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 							// beep
 							if (doSound) {
-								try {
+								/*try {
 							        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 							        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
 							        r.play();
-							    } catch (Exception e) {}
+							    } catch (Exception e) {}*/
+								MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.robot_blip);
+								//mp.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
+								mp.setVolume(0.1f, 0.1f);
+								mp.start();
+								
 							}
 							
 							// Vibrate for 50 milliseconds
