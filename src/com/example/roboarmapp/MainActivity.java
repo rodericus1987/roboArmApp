@@ -90,6 +90,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		displacement = new float[3];
 		for (int i = 0; i < 3; i++) {
@@ -370,7 +372,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 							    } catch (Exception e) {}*/
 								MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.robot_blip);
 								//mp.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
-								mp.setVolume(0.1f, 0.1f);
+								//mp.setVolume(0.1f, 0.1f);
 								mp.start();
 								
 							}
