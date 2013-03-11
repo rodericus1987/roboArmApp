@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -25,7 +26,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnPreparedListener;
 import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -54,6 +54,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static String serverPort = "4012";
 	public static Socket mySocket;
 	public static OutputStream out;
+	public static InputStream in;
 	public static boolean socketConnected = false;
 	public static Timer myTimer;
 	public static boolean doVibrate = true;
@@ -194,6 +195,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 		};
 		handler.postDelayed(r, 1000);
+		
+		new readFromServer().execute();
 	}
 
 	private void setOnMainButton() {
@@ -272,6 +275,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					socketConnected = false;
 					out.flush();
 					out.close();
+					in.close();
 					mySocket.close();
 				}
 			} catch (IOException e) {
@@ -313,6 +317,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 				socketConnected = false;
 				out.flush();
 				out.close();
+				in.close();
 				mySocket.close();
 			}
 		} catch (IOException e) {
@@ -320,6 +325,34 @@ public class MainActivity extends Activity implements SensorEventListener {
 			e.printStackTrace();
 		}
 		super.onDestroy();
+	}
+	
+	public class readFromServer extends AsyncTask<Void, Void, Void> {
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			if (socketConnected) {
+				try {
+					in.read();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				v1.vibrate(500);
+			} else {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			new readFromServer().execute();
+		}
 	}
 
 	public class ConnectToServer extends AsyncTask<Void, Void, Void> {
@@ -331,6 +364,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 				mySocket = new Socket();
 				mySocket.connect(new InetSocketAddress(serverIP, Integer.parseInt(serverPort)), 2000);
 				out = mySocket.getOutputStream();
+				in = mySocket.getInputStream();
 				socketConnected = true;
 				Log.d("DEBUG: ", "Tried Connection");
 			} catch (IOException e) {
@@ -591,6 +625,13 @@ class doSendTimerTask extends TimerTask {
 					MainActivity.out.write(outByteData);
 				} catch (IOException e) {
 					MainActivity.socketConnected = false;
+					try {
+						MainActivity.out.close();
+						MainActivity.in.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 					e.printStackTrace();
 				}
 			}
@@ -598,6 +639,13 @@ class doSendTimerTask extends TimerTask {
 				MainActivity.out.flush();
 			} catch (IOException e) {
 				MainActivity.socketConnected = false;
+				try {
+					MainActivity.out.close();
+					MainActivity.in.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				e.printStackTrace();
 			}
 		}

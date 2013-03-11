@@ -22,7 +22,7 @@ import android.widget.TextView;
 public class SettingsActivity extends Activity {
 	
 	private static final String[] items={"10Hz", "50Hz", "100Hz"};
-	public static String prevIP, prevPort;
+	public static String prevIP, prevPort, prevPeriod;
 	EditText ipAddress;
 	EditText portText;
 	EditText sendRateText;
@@ -102,6 +102,7 @@ public class SettingsActivity extends Activity {
 		
 		prevIP = MainActivity.serverIP;
 		prevPort = MainActivity.serverPort;
+		prevPeriod = MainActivity.period;
 		
 		// Show the Up button in the action bar.
 		//getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -203,6 +204,18 @@ public class SettingsActivity extends Activity {
 		MainActivity.serverIP = ipAddress.getText().toString().trim();
 		MainActivity.serverPort = portText.getText().toString().trim();
 		MainActivity.period = sendRateText.getText().toString().trim();
+		
+		if (MainActivity.serverIP.equals("")) {
+			MainActivity.serverIP = prevIP;
+		}
+		
+		if (MainActivity.serverPort.equals("")) {
+			MainActivity.serverPort = prevPort;
+		}
+		
+		if (MainActivity.period.equals("")) {
+			MainActivity.period = prevPeriod;
+		}
 		
 		if ((!prevIP.equals(MainActivity.serverIP)) || (!prevPort.equals(MainActivity.serverPort))) {
 			MainActivity.serverSettingsChanged = true;
