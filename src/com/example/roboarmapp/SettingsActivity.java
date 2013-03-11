@@ -1,13 +1,23 @@
 package com.example.roboarmapp;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 public class SettingsActivity extends Activity {
 	
@@ -16,6 +26,8 @@ public class SettingsActivity extends Activity {
 	EditText ipAddress;
 	EditText portText;
 	EditText sendRateText;
+	CheckBox vibrationCheck;
+	CheckBox soundCheck;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +39,66 @@ public class SettingsActivity extends Activity {
 		portText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
 		sendRateText = (EditText)findViewById(R.id.editSendRate);
 		sendRateText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+		
+		vibrationCheck = (CheckBox)findViewById(R.id.vibration);
+		vibrationCheck.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				if (MainActivity.doVibrate) {
+					MainActivity.doVibrate = false;
+					vibrationCheck.setChecked(false);
+				} else {
+					MainActivity.doVibrate = true;
+					vibrationCheck.setChecked(true);
+				}
+			}
+		});
+		
+		TextView vibrationText = (TextView)findViewById(R.id.vibration_text);
+		vibrationText.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				if (MainActivity.doVibrate) {
+					MainActivity.doVibrate = false;
+					vibrationCheck.setChecked(false);
+				} else {
+					MainActivity.doVibrate = true;
+					vibrationCheck.setChecked(true);
+				}
+			}
+		});
+		
+		soundCheck = (CheckBox)findViewById(R.id.sound);
+		soundCheck.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				if (MainActivity.doSound) {
+					MainActivity.doSound = false;
+					soundCheck.setChecked(false);
+				} else {
+					MainActivity.doSound = true;
+					soundCheck.setChecked(true);
+				}
+			}
+		});
+		
+		TextView soundText = (TextView)findViewById(R.id.sound_text);
+		soundText.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				if (MainActivity.doSound) {
+					MainActivity.doSound = false;
+					soundCheck.setChecked(false);
+				} else {
+					MainActivity.doSound = true;
+					soundCheck.setChecked(true);
+				}
+			}
+		});
 		
 		prevIP = MainActivity.serverIP;
 		prevPort = MainActivity.serverPort;
@@ -45,7 +117,57 @@ public class SettingsActivity extends Activity {
 		ipAddress.setText(MainActivity.serverIP);
 		portText.setText(MainActivity.serverPort);
 		sendRateText.setText(MainActivity.period);
+		if (MainActivity.doVibrate) {
+			vibrationCheck.setChecked(true);
+		} else {
+			vibrationCheck.setChecked(false);
+		}
+		if (MainActivity.doSound) {
+			soundCheck.setChecked(true);
+		} else {
+			soundCheck.setChecked(false);
+		}
 		super.onResume();
+	}
+	
+	@Override
+	public void onPause() {
+		File fileTest = getFileStreamPath("settings.txt");
+		if (fileTest.exists()) {
+			fileTest.delete();
+		}
+		try {
+			FileOutputStream out = openFileOutput("settings.txt", Context.MODE_PRIVATE);
+			int i;
+			String entry = "";
+			entry += MainActivity.serverIP;
+			entry += "|";
+			entry += MainActivity.serverPort;
+			entry += "|";
+			entry += MainActivity.period;
+			entry += "|";
+			if (MainActivity.doVibrate) {
+				entry += "1";
+			} else {
+				entry += "0";
+			}
+			entry += "|";
+			if (MainActivity.doSound) {
+				entry += "1";
+			} else {
+				entry += "0";
+			}
+			out.write(entry.getBytes());
+			out.getFD().sync();
+			out.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		super.onPause();
 	}
 	
 	@Override

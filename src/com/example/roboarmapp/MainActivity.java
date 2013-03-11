@@ -58,13 +58,17 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static boolean socketConnected = false;
 	public static Timer myTimer;
 	public static boolean doVibrate = true;
-	public static boolean doBeep = true;
+	public static boolean doSound = true;
 
 	public static boolean sensorsStarted = false;
 	public static boolean reconnectButtonSet = false;
 	public static boolean serverSettingsChanged = false;
+	
+	public static SeekBar gripperBar;
+	public static Button myMainButton;
 
 	public static String period = "1000"; // # of ms between tcp/ip data send
+	private static Vibrator v1;
 
 	// Sensors
 	private SensorManager mSensorManager;
@@ -97,6 +101,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 		for (int i = 0; i < 3; i++) {
 			speed[i] = 0.0f;
 		}
+		
+		v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		gripperBar = (SeekBar) findViewById(R.id.gripperBar);
+		myMainButton = (Button) findViewById(R.id.startStopButton);		
 
 		// check for settings file
 		File fileTest = getFileStreamPath("settings.txt");
@@ -113,6 +121,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 				serverIP = entries[0];
 				serverPort = entries[1];
 				period = entries[2];
+				doVibrate = true;
+				if (entries[3].equals("0")) {
+					doVibrate = false;
+				}
+				doSound = true;
+				if (entries[4].equals("0")) {
+					doSound = false;
+				}
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -132,7 +148,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 							rollAngle = 0;
 							pitchAngle = 0;
 							grip = 0;
-							SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
 							gripperBar.setProgress(0);
 						}
 					}
@@ -146,7 +161,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 		});
 
-		SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
 		gripperBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
 			@Override
@@ -159,7 +173,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 			public void onStartTrackingTouch(SeekBar arg0) {
 				// Vibrate for 50 milliseconds
 				if (doVibrate) {
-					Vibrator v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 					v1.vibrate(50);
 				}
 			}
@@ -167,11 +180,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 			@Override
 			public void onStopTrackingTouch(SeekBar arg0) {
 				Log.d("CHECK:", "Current progress is " + grip);
-				// Vibrate for 25 milliseconds
-				if (doVibrate) {
-					Vibrator v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-					v1.vibrate(25);
-				}
 			}
 		});
 
@@ -188,13 +196,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 	}
 
 	private void setOnMainButton() {
-		Button myMainButton = (Button) findViewById(R.id.startStopButton);
 		myMainButton.setBackgroundColor(Color.RED);
 		myMainButton.setText(R.string.release_to_stop);
 	}
 
 	private void resetMainButton() {
-		Button myMainButton = (Button) findViewById(R.id.startStopButton);
 		myMainButton.setBackgroundColor(Color.GREEN);
 		myMainButton.setText(R.string.start_stop);
 	}
@@ -257,7 +263,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onResume() {
-		Button myMainButton = (Button) findViewById(R.id.startStopButton);
 		
 		if (serverSettingsChanged) {
 			serverSettingsChanged = false;
@@ -274,7 +279,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 		}
 		
-		if (!socketConnected) {
+		if (serverIP.equals("")) {
+			gripperBar.setEnabled(false);
+			myMainButton.setBackgroundColor(Color.YELLOW);
+			myMainButton.setText(R.string.no_ip);
+			myMainButton.setOnTouchListener(null);
+		} else if (!socketConnected) {
+			gripperBar.setEnabled(false);
 			myMainButton.setBackgroundColor(Color.YELLOW);
 			myMainButton.setText(R.string.connecting);
 			new ConnectToServer().execute();
@@ -292,35 +303,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 		myTimer.cancel();
 		myTimer.purge();
 		super.onPause();
-	}
-
-	@Override
-	protected void onStop() {
-		File fileTest = getFileStreamPath("settings.txt");
-		if (fileTest.exists()) {
-			fileTest.delete();
-		}
-		try {
-			FileOutputStream out = openFileOutput("settings.txt", Context.MODE_PRIVATE);
-			int i;
-			String entry = "";
-			entry += serverIP;
-			entry += "|";
-			entry += serverPort;
-			entry += "|";
-			entry += period;
-			out.write(entry.getBytes());
-			out.getFD().sync();
-			out.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		super.onStop();
 	}
 	
 	@Override
@@ -346,7 +328,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 			try {
 				mySocket = new Socket();
-				mySocket.connect(new InetSocketAddress(serverIP, Integer.parseInt(serverPort)), 1000);
+				mySocket.connect(new InetSocketAddress(serverIP, Integer.parseInt(serverPort)), 2000);
 				out = mySocket.getOutputStream();
 				socketConnected = true;
 				Log.d("DEBUG: ", "Tried Connection");
@@ -358,15 +340,17 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			Button myMainButton = (Button) findViewById(R.id.startStopButton);
 			if (!socketConnected) {
-				if (serverIP == "") {
+				gripperBar.setEnabled(false);
+				if (serverIP.equals("")) {
+					myMainButton.setBackgroundColor(Color.YELLOW);
 					myMainButton.setText(R.string.no_ip);
 					myMainButton.setOnTouchListener(null);
 				} else {
 					reconnectButtonSet = false;
 				}
 			} else {
+				gripperBar.setEnabled(true);
 				reconnectButtonSet = false;
 				myMainButton.setBackgroundColor(Color.GREEN);
 				myMainButton.setText(R.string.start_stop);
@@ -377,8 +361,22 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 						switch (event.getAction()) {
 						case MotionEvent.ACTION_DOWN: {
+
+							// beep
+							if (doSound) {
+								try {
+							        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+							        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+							        r.play();
+							    } catch (Exception e) {}
+							}
+							
+							// Vibrate for 50 milliseconds
+							if (doVibrate) {
+								v1.vibrate(50);
+							}
+							
 							buttonIsDown = true;
-							SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
 							gripperBar.setEnabled(false);
 							Button homeButton = (Button) findViewById(R.id.homeButton);
 							Button lockButton = (Button) findViewById(R.id.lockButton);
@@ -387,27 +385,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 							startSensors();
 							setOnMainButton();
 							
-							// Vibrate for 150 milliseconds
-							if (doVibrate) {
-								Vibrator v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-								v1.vibrate(150);
-							}
-							
-							// beep
-							if (doBeep) {
-								try {
-							        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-							        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-							        r.play();
-							    } catch (Exception e) {}
-							}
-							
 							return true;
 						}
 
 						case MotionEvent.ACTION_UP: {
+							
 							buttonIsDown = false;
-							SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
 							gripperBar.setEnabled(true);
 							Button homeButton = (Button) findViewById(R.id.homeButton);
 							Button lockButton = (Button) findViewById(R.id.lockButton);
@@ -415,12 +398,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 							lockButton.setEnabled(true);
 							stopSensors();
 							resetMainButton();
-							
-							// Vibrate for 50 milliseconds
-							if (doVibrate) {
-								Vibrator v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-								v1.vibrate(50);
-							}
 							
 							return true;
 						}
@@ -558,18 +535,19 @@ public class MainActivity extends Activity implements SensorEventListener {
 		{
 			public void run() 
 			{
-				if ((!socketConnected) && (!reconnectButtonSet) && (serverIP != "")) {
+				if ((!socketConnected) && (!reconnectButtonSet) && (!serverIP.equals(""))) {
 					stopSensors();
-					SeekBar gripperBar = (SeekBar) findViewById(R.id.gripperBar);
-					gripperBar.setEnabled(true);
-					Button myMainButton = (Button) findViewById(R.id.startStopButton);
+					gripperBar.setEnabled(false);
 					myMainButton.setText(R.string.connect_error);
 					myMainButton.setBackgroundColor(Color.YELLOW);
 					myMainButton.setOnTouchListener(new OnTouchListener() {
 						public boolean onTouch(View v, MotionEvent event) {
 							switch (event.getAction()) {
 							case MotionEvent.ACTION_UP: {
-								Button myMainButton = (Button) findViewById(R.id.startStopButton);
+								// Vibrate for 50 milliseconds
+								if (doVibrate) {
+									v1.vibrate(50);
+								}
 								myMainButton.setText(R.string.connecting);
 								new ConnectToServer().execute();
 								myMainButton.setOnTouchListener(null);
