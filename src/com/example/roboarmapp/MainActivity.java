@@ -179,7 +179,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 			@Override
 			public void onStopTrackingTouch(SeekBar arg0) {
-				Log.d("CHECK:", "Current progress is " + grip);
+				//Log.d("CHECK:", "Current progress is " + grip);
 			}
 		});
 
@@ -236,6 +236,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 			acceleration = new float [4];
 			lastMeasurement1 = System.nanoTime();
 			lastMeasurement2 = System.nanoTime();
+			speed[0] = 0;
+			speed[1] = 0;
+			speed[2] = 0;
 			reference = true;
 			// rollAngle = 0;
 			// pitchAngle = 0;
@@ -331,11 +334,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 			if (socketConnected) {
 				try {
 					in.read();
+					v1.vibrate(500);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				v1.vibrate(500);
 			} else {
 				try {
 					Thread.sleep(500);
@@ -458,6 +461,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 		if (event.sensor.equals(mGyroscope)) {
 			float roll = event.values[1]; // around axis y
 			float pitch = event.values[0]; // around axis x
+			if (roll < 0.005 && roll > -0.005) {
+				roll = 0;
+			}
+			if (pitch < 0.005 & pitch > -0.005) {
+				pitch = 0;
+			}
 			long timeInterval = event.timestamp - lastMeasurement2;
 			lastMeasurement2 = event.timestamp;
 			// Assume the device has been turning with same speed for the whole
@@ -482,12 +491,17 @@ public class MainActivity extends Activity implements SensorEventListener {
 		if (event.sensor.equals(mAccelerometer)) {
 			float [] rawLinear = { event.values[0], event.values[1],
 					event.values[2], 0 };
+			for (int i = 0; i<3; i++) {
+				if (rawLinear[i] < 0.2 && rawLinear[i] > -0.2) {
+					rawLinear[i] = 0;
+				}
+			}
 			float [] temp = new float [16];
 			rotationMatrix = new float [16];
 			SensorManager.getRotationMatrixFromVector(temp, rotationVector);
 			Matrix.invertM(rotationMatrix, 0, temp, 0);
 			Matrix.multiplyMV(acceleration, 0, rotationMatrix, 0, rawLinear, 0);
-			//Log.d("CHECK:", "x = " + acceleration[0] + "; y = " + acceleration[1] + "; z = " + acceleration[2]);
+			Log.d("CHECK:", "x = " + acceleration[0] + "; y = " + acceleration[1] + "; z = " + acceleration[2]);
 			long timeInterval = event.timestamp - lastMeasurement1;
 			lastMeasurement1 = event.timestamp;
 
@@ -511,59 +525,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		if (event.sensor.equals(mRotation)) {
 			rotationVector = event.values;
 		}
-
-		if (event.sensor.equals(mOrientation)) {
-			float roll = event.values[2];
-			float pitch = event.values[1];
-			if (pitch > 90) {
-				if (roll > 0)
-					roll = 180 - roll;
-				else
-					roll = -180 - roll;
-			}
-
-			if (reference) {
-				referenceRoll = roll;
-				referencePitch = pitch;
-				reference = false;
-			}
-
-			float tempRoll = (float) (referenceRoll + rollAngle * 360 / 2
-					/ Math.PI);
-			float tempPitch = (float) (referencePitch + pitchAngle * 360 / 2
-					/ Math.PI);
-			while (tempRoll > 180) {
-				tempRoll = tempRoll - 360;
-			}
-			while (tempRoll < -180) {
-				tempRoll = tempRoll + 360;
-			}
-			while (tempPitch > 180) {
-				tempPitch = tempPitch - 360;
-			}
-			while (tempPitch < -180) {
-				tempPitch = tempPitch + 360;
-			}
-
-			float diffRoll = roll - tempRoll;
-			float diffPitch = pitch - tempPitch;
-			if (diffRoll > 180) {
-				diffRoll = diffRoll - 360;
-			} else if (diffRoll < -180) {
-				diffRoll = diffRoll + 360;
-			}
-			if (diffPitch > 180) {
-				diffPitch = diffPitch - 360;
-			} else if (diffPitch < -180) {
-				diffPitch = diffPitch + 360;
-			}
-			/*
-			Log.d("CHECK:", "The current roll is " + tempRoll
-					+ "; The expected roll is " + roll);*/
-			// Log.d("CHECK:", "The current roll is " + (rollAngle * 360 / 2 /
-			// Math.PI) + "; The expected roll is " + (diffPitch + rollAngle *
-			// 360 / 2 / Math.PI));
-		}
+		
 	}
 
 	protected void checkConnectionStatus() {
@@ -605,9 +567,9 @@ class doSendTimerTask extends TimerTask {
 			MainActivity.displacement[0] = 0.0f;
 			MainActivity.displacement[1] = 0.0f;
 			MainActivity.displacement[2] = 0.0f;
-			MainActivity.speed[0] = 0.0f;
-			MainActivity.speed[1] = 0.0f;
-			MainActivity.speed[2] = 0.0f;
+			//MainActivity.speed[0] = 0.0f;
+			//MainActivity.speed[1] = 0.0f;
+			//MainActivity.speed[2] = 0.0f;
 
 
 			for (int i = 0; i < outFloatData.length; i++) {
