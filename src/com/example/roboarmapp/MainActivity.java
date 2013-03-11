@@ -34,6 +34,7 @@ import android.os.Vibrator;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -58,11 +59,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static Timer myTimer;
 	public static boolean doVibrate = true;
 	public static boolean doSound = true;
+	
+	public static boolean dataIsSent = false;
 
 	public static boolean sensorsStarted = false;
 	public static boolean reconnectButtonSet = false;
 	public static boolean serverSettingsChanged = false;
-	
+
 	public static SeekBar gripperBar;
 	public static Button myMainButton;
 
@@ -91,7 +94,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		displacement = new float[3];
@@ -105,7 +108,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			speed[i] = 0.0f;
 			previous_speed[i] = 0.0f;
 		}
-		
+
 		v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 		gripperBar = (SeekBar) findViewById(R.id.gripperBar);
 		myMainButton = (Button) findViewById(R.id.startStopButton);		
@@ -192,11 +195,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 			public void run() 
 			{
 				checkConnectionStatus();
-				handler.postDelayed(this, 1000);
+				handler.postDelayed(this, 500);
 			}
 		};
-		handler.postDelayed(r, 1000);
-		
+		handler.post(r);
+
 		new readFromServer().execute();
 	}
 
@@ -234,7 +237,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					SensorManager.SENSOR_DELAY_NORMAL);
 			mSensorManager.registerListener(this, mRotation,
 					SensorManager.SENSOR_DELAY_NORMAL);
-	
+
 			rotationVector = new float [3];
 			acceleration = new float [4];
 			lastMeasurement1 = System.nanoTime();
@@ -257,6 +260,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add("Disconnect").setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				grip = 200; // disconnect signal
+				dataIsSent = false;
+				return false;
+			}
+
+		});
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
@@ -264,14 +277,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Intent intent = new Intent(this, SettingsActivity.class);
-		startActivity(intent);
+		if (item.getItemId() == R.id.menu_settings) {
+			Intent intent = new Intent(this, SettingsActivity.class);
+			startActivity(intent);
+		}
 		return true;
 	}
 
 	@Override
 	public void onResume() {
-		
+
 		if (serverSettingsChanged) {
 			serverSettingsChanged = false;
 			try {
@@ -287,7 +302,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (serverIP.equals("")) {
 			gripperBar.setEnabled(false);
 			myMainButton.setBackgroundColor(Color.YELLOW);
@@ -299,11 +314,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 			myMainButton.setText(R.string.connecting);
 			new ConnectToServer().execute();
 		}
-		
+
 		myTimer = new Timer();
 		doSendTimerTask myTask = new doSendTimerTask();
 		myTimer.schedule(myTask, 0, Integer.parseInt(period));
-		
+
 		super.onResume();
 	}
 
@@ -313,7 +328,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		myTimer.purge();
 		super.onPause();
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		try {
@@ -330,7 +345,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		}
 		super.onDestroy();
 	}
-	
+
 	public class readFromServer extends AsyncTask<Void, Void, Void> {
 		@Override
 		protected Void doInBackground(Void... arg0) {
@@ -354,7 +369,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected void onPostExecute(Void result) {
 			new readFromServer().execute();
@@ -414,14 +429,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 								//mp.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
 								//mp.setVolume(0.1f, 0.1f);
 								mp.start();
-								
+
 							}
-							
+
 							// Vibrate for 50 milliseconds
 							if (doVibrate) {
 								v1.vibrate(50);
 							}
-							
+
 							gripperBar.setEnabled(false);
 							Button homeButton = (Button) findViewById(R.id.homeButton);
 							Button lockButton = (Button) findViewById(R.id.lockButton);
@@ -429,12 +444,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 							lockButton.setEnabled(false);
 							startSensors();
 							setOnMainButton();
-							
+
 							return true;
 						}
 
 						case MotionEvent.ACTION_UP: {
-							
+
 							gripperBar.setEnabled(true);
 							Button homeButton = (Button) findViewById(R.id.homeButton);
 							Button lockButton = (Button) findViewById(R.id.lockButton);
@@ -442,7 +457,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 							lockButton.setEnabled(true);
 							stopSensors();
 							resetMainButton();
-							
+							v1.cancel();
+
 							return true;
 						}
 
@@ -485,10 +501,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 				pitch = (float) (pitch * timeInterval * NS2S);
 				pitchAngle = pitchAngle + pitch;
 			}
-			
+
 			Log.d("CHECK: ", "The current roll value is " + rollAngle * 360 /
-			 2 / Math.PI);
-			 
+					2 / Math.PI);
+
 			// float[] outFloatData = { rollAngle, pitchAngle, 0, 0, 0, grip };
 			// doSend(outFloatData);
 		}
@@ -549,7 +565,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		if (event.sensor.equals(mRotation)) {
 			rotationVector = event.values;
 		}
-		
+
 	}
 
 	protected void checkConnectionStatus() {
@@ -578,6 +594,21 @@ public class MainActivity extends Activity implements SensorEventListener {
 						}});
 					reconnectButtonSet = true;
 				}
+				if ((grip == 200) && (dataIsSent)) {
+					try {
+						if (socketConnected) {
+							socketConnected = false;
+							out.flush();
+							out.close();
+							in.close();
+							mySocket.close();
+						}
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					grip = gripperBar.getProgress();
+				}
 			}
 		});
 	}
@@ -588,7 +619,7 @@ class doSendTimerTask extends TimerTask {
 		if (MainActivity.socketConnected) {
 			float[] outFloatData = { MainActivity.rollAngle, MainActivity.pitchAngle, MainActivity.displacement[0], MainActivity.displacement[1], MainActivity.displacement[2], MainActivity.grip };
 			//Log.d("CHECK:", "x = " + MainActivity.displacement[0] + "; y = " + MainActivity.displacement[1] + "; z = " + MainActivity.displacement[2]);
-			
+
 			MainActivity.displacement[0] = 0.0f;
 			MainActivity.displacement[1] = 0.0f;
 			MainActivity.displacement[2] = 0.0f;
@@ -620,6 +651,7 @@ class doSendTimerTask extends TimerTask {
 			}
 			try {
 				MainActivity.out.flush();
+				MainActivity.dataIsSent = true;
 			} catch (IOException e) {
 				MainActivity.socketConnected = false;
 				try {
