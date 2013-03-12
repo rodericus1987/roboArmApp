@@ -59,7 +59,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static Timer myTimer;
 	public static boolean doVibrate = true;
 	public static boolean doSound = true;
-	public static boolean dataIsSent = false;
 
 	public static boolean sensorsStarted = false;
 	public static boolean reconnectButtonSet = false;
@@ -153,7 +152,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 							rollAngle = 0;
 							pitchAngle = 0;
 							grip = 300; // home signal
-							dataIsSent = false;
 							gripperBar.setProgress(0);
 						}
 					}
@@ -172,7 +170,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 			@Override
 			public void onProgressChanged(SeekBar arg0, int progress,
 					boolean arg2) {
-				grip = (float) progress;
+				if (grip <= 100) {
+					grip = (float) progress;
+				}
 			}
 
 			@Override
@@ -265,7 +265,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 			@Override
 			public boolean onMenuItemClick(MenuItem item) {
 				grip = 200; // disconnect signal
-				dataIsSent = false;
 				return false;
 			}
 
@@ -594,24 +593,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 						}});
 					reconnectButtonSet = true;
 				}
-				if ((grip == 200) && (dataIsSent)) { // disconnect case
-					try {
-						if (socketConnected) {
-							socketConnected = false;
-							out.flush();
-							out.close();
-							in.close();
-							mySocket.close();
-						}
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					grip = gripperBar.getProgress();
-				}
-				if ((grip == 300) && (dataIsSent)) { // home case
-					grip = gripperBar.getProgress();
-				}
 			}
 		});
 	}
@@ -620,6 +601,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 class doSendTimerTask extends TimerTask {
 	public void run() {
 		if (MainActivity.socketConnected) {
+			boolean disconnectCase = false;
+			boolean homeCase = false;
+			if (MainActivity.grip == 200) {
+				disconnectCase = true;
+			} else if (MainActivity.grip == 300) {
+				homeCase = true;
+			}
 			float[] outFloatData = { MainActivity.rollAngle, MainActivity.pitchAngle, MainActivity.displacement[0], MainActivity.displacement[1], MainActivity.displacement[2], MainActivity.grip };
 			//Log.d("CHECK:", "x = " + MainActivity.displacement[0] + "; y = " + MainActivity.displacement[1] + "; z = " + MainActivity.displacement[2]);
 
@@ -654,7 +642,23 @@ class doSendTimerTask extends TimerTask {
 			}
 			try {
 				MainActivity.out.flush();
-				MainActivity.dataIsSent = true;
+				if (disconnectCase) { // disconnect case
+					try {
+						if (MainActivity.socketConnected) {
+							MainActivity.socketConnected = false;
+							MainActivity.out.close();
+							MainActivity.in.close();
+							MainActivity.mySocket.close();
+						}
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					MainActivity.grip = MainActivity.gripperBar.getProgress();
+				}
+				if (homeCase) { // home case
+					MainActivity.grip = MainActivity.gripperBar.getProgress();
+				}
 			} catch (IOException e) {
 				MainActivity.socketConnected = false;
 				try {
