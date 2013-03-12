@@ -59,7 +59,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static Timer myTimer;
 	public static boolean doVibrate = true;
 	public static boolean doSound = true;
-	
 	public static boolean dataIsSent = false;
 
 	public static boolean sensorsStarted = false;
@@ -153,7 +152,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							rollAngle = 0;
 							pitchAngle = 0;
-							grip = 0;
+							grip = 300; // home signal
+							dataIsSent = false;
 							gripperBar.setProgress(0);
 						}
 					}
@@ -594,7 +594,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 						}});
 					reconnectButtonSet = true;
 				}
-				if ((grip == 200) && (dataIsSent)) {
+				if ((grip == 200) && (dataIsSent)) { // disconnect case
 					try {
 						if (socketConnected) {
 							socketConnected = false;
@@ -607,6 +607,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					grip = gripperBar.getProgress();
+				}
+				if ((grip == 300) && (dataIsSent)) { // home case
 					grip = gripperBar.getProgress();
 				}
 			}
