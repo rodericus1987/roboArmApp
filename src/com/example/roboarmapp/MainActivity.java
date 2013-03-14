@@ -87,6 +87,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private float referenceRoll;
 	private float referencePitch;
 	public static float grip = 0.0f;
+	public static int sensitivity = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -501,8 +502,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 				pitchAngle = pitchAngle + pitch;
 			}
 
-			Log.d("CHECK: ", "The current roll value is " + rollAngle * 360 /
-					2 / Math.PI);
+			//Log.d("CHECK: ", "The current roll value is " + rollAngle * 360 /	2 / Math.PI);
 
 			// float[] outFloatData = { rollAngle, pitchAngle, 0, 0, 0, grip };
 			// doSend(outFloatData);
@@ -608,8 +608,11 @@ class doSendTimerTask extends TimerTask {
 			} else if (MainActivity.grip == 300) {
 				homeCase = true;
 			}
+			for (int i = 0; i < 3; i++) {
+				MainActivity.displacement[i] = MainActivity.displacement[i] / (1.0f + (float)(MainActivity.sensitivity / 25.0f));
+			}
 			float[] outFloatData = { MainActivity.rollAngle, MainActivity.pitchAngle, MainActivity.displacement[0], MainActivity.displacement[1], MainActivity.displacement[2], MainActivity.grip };
-			//Log.d("CHECK:", "x = " + MainActivity.displacement[0] + "; y = " + MainActivity.displacement[1] + "; z = " + MainActivity.displacement[2]);
+			Log.d("CHECK:", "x = " + MainActivity.displacement[0] + "; y = " + MainActivity.displacement[1] + "; z = " + MainActivity.displacement[2]);
 
 			MainActivity.displacement[0] = 0.0f;
 			MainActivity.displacement[1] = 0.0f;
