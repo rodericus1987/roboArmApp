@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 public class SettingsActivity extends Activity {
@@ -25,6 +27,7 @@ public class SettingsActivity extends Activity {
 	EditText sendRateText;
 	CheckBox vibrationCheck;
 	CheckBox soundCheck;
+	SeekBar sensitivityBar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +39,24 @@ public class SettingsActivity extends Activity {
 		portText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
 		sendRateText = (EditText)findViewById(R.id.editSendRate);
 		sendRateText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+		
+		sensitivityBar = (SeekBar)findViewById(R.id.sensitivity);
+		sensitivityBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+			@Override
+			public void onProgressChanged(SeekBar arg0, int progress,
+					boolean arg2) {
+					MainActivity.sensitivity = progress;
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar arg0) {
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar arg0) {
+			}
+		});
 		
 		vibrationCheck = (CheckBox)findViewById(R.id.vibration);
 		vibrationCheck.setOnClickListener(new OnClickListener() {

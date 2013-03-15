@@ -608,11 +608,12 @@ class doSendTimerTask extends TimerTask {
 			} else if (MainActivity.grip == 300) {
 				homeCase = true;
 			}
+			//Log.d("x displacement", "" + MainActivity.displacement[0]);
 			for (int i = 0; i < 3; i++) {
 				MainActivity.displacement[i] = MainActivity.displacement[i] / (1.0f + (float)(MainActivity.sensitivity / 25.0f));
 			}
 			float[] outFloatData = { MainActivity.rollAngle, MainActivity.pitchAngle, MainActivity.displacement[0], MainActivity.displacement[1], MainActivity.displacement[2], MainActivity.grip };
-			Log.d("CHECK:", "x = " + MainActivity.displacement[0] + "; y = " + MainActivity.displacement[1] + "; z = " + MainActivity.displacement[2]);
+			//Log.d("CHECK:", "x = " + MainActivity.displacement[0] + "; y = " + MainActivity.displacement[1] + "; z = " + MainActivity.displacement[2]);
 
 			MainActivity.displacement[0] = 0.0f;
 			MainActivity.displacement[1] = 0.0f;
