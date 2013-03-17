@@ -674,6 +674,8 @@ class doSendTimerTask extends TimerTask {
 				}
 				e.printStackTrace();
 			}
+		} else {
+			MainActivity.grip = MainActivity.gripperBar.getProgress(); // reset Home or Disconnect signals if not connected
 		}
 	}
 }
