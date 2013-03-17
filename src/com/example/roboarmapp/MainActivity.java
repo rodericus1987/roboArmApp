@@ -69,6 +69,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	public static String period = "1000"; // # of ms between tcp/ip data send
 	private static Vibrator v1;
+	
+	private static Context mainActivityContext;
 
 	// Sensors
 	private SensorManager mSensorManager;
@@ -95,6 +97,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 		setContentView(R.layout.activity_main);
 
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		
+		mainActivityContext = this;
 
 		displacement = new float[3];
 		for (int i = 0; i < 3; i++) {
@@ -289,18 +293,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 		if (serverSettingsChanged) {
 			serverSettingsChanged = false;
-			try {
-				if (socketConnected) {
-					socketConnected = false;
-					out.flush();
-					out.close();
-					in.close();
-					mySocket.close();
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			disconnectFromServer();
 		}
 
 		if (serverIP.equals("")) {
@@ -331,18 +324,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	protected void onDestroy() {
-		try {
-			if (socketConnected) {
-				socketConnected = false;
-				out.flush();
-				out.close();
-				in.close();
-				mySocket.close();
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		disconnectFromServer();
 		super.onDestroy();
 	}
 
@@ -380,6 +362,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 		@Override
 		protected Void doInBackground(Void... arg0) {
 			Log.d("DEBUG: ", "Before connection");
+			
+			/*if (doSound) {
+				MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.connecting);
+				mp.start();
+
+			}*/
 
 			try {
 				mySocket = new Socket();
@@ -397,6 +385,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 		@Override
 		protected void onPostExecute(Void result) {
 			if (!socketConnected) {
+				if (doSound) {
+					MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.connection_failed);
+					mp.start();
+
+				}
 				gripperBar.setEnabled(false);
 				if (serverIP.equals("")) {
 					myMainButton.setBackgroundColor(Color.YELLOW);
@@ -406,6 +399,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 					reconnectButtonSet = false;
 				}
 			} else {
+				if (doSound) {
+					MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.arm_connected);
+					mp.start();
+
+				}
 				gripperBar.setEnabled(true);
 				reconnectButtonSet = false;
 				myMainButton.setBackgroundColor(Color.GREEN);
@@ -420,14 +418,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 							// beep
 							if (doSound) {
-								/*try {
-							        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-							        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-							        r.play();
-							    } catch (Exception e) {}*/
 								MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.robot_blip);
-								//mp.setAudioStreamType(AudioManager.STREAM_NOTIFICATION);
-								//mp.setVolume(0.1f, 0.1f);
 								mp.start();
 
 							}
@@ -566,6 +557,26 @@ public class MainActivity extends Activity implements SensorEventListener {
 		}
 
 	}
+	
+	public static void disconnectFromServer() {
+		if (socketConnected) {
+			socketConnected = false;
+			try {
+				out.flush();
+				out.close();
+				in.close();
+				mySocket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if (doSound) {
+				MediaPlayer mp = MediaPlayer.create(mainActivityContext, R.raw.arm_disconnected);
+				mp.start();
+
+			}
+		}
+	}
 
 	protected void checkConnectionStatus() {
 		runOnUiThread(new Runnable() 
@@ -647,17 +658,7 @@ class doSendTimerTask extends TimerTask {
 			try {
 				MainActivity.out.flush();
 				if (disconnectCase) { // disconnect case
-					try {
-						if (MainActivity.socketConnected) {
-							MainActivity.socketConnected = false;
-							MainActivity.out.close();
-							MainActivity.in.close();
-							MainActivity.mySocket.close();
-						}
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					MainActivity.disconnectFromServer();
 					MainActivity.grip = MainActivity.gripperBar.getProgress();
 				}
 				if (homeCase) { // home case

@@ -64,7 +64,11 @@ public final class R {
         public static final int activity_settings=0x7f070002;
     }
     public static final class raw {
-        public static final int robot_blip=0x7f040000;
+        public static final int arm_connected=0x7f040000;
+        public static final int arm_disconnected=0x7f040001;
+        public static final int connecting=0x7f040002;
+        public static final int connection_failed=0x7f040003;
+        public static final int robot_blip=0x7f040004;
     }
     public static final class string {
         public static final int app_name=0x7f050000;
