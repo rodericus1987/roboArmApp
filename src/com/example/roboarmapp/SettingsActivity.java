@@ -41,7 +41,7 @@ public class SettingsActivity extends Activity {
 		sendRateText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
 		
 		sensitivityBar = (SeekBar)findViewById(R.id.sensitivity);
-		sensitivityBar.setProgress(MainActivity.sensitivity);
+		sensitivityBar.setProgress(100 - MainActivity.sensitivity);
 		sensitivityBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
 			@Override
