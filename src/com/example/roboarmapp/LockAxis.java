@@ -45,7 +45,7 @@ public class LockAxis extends Activity {
 		
 		axis = (ImageView)findViewById(R.id.axis);
 		
-		mySwitch = (Switch)findViewById(R.id.switch1);
+		mySwitch = (Switch)findViewById(R.id.lock_switch);
 		if (MainActivity.armMode) {
 			mySwitch.setChecked(false);
 		} else {
@@ -190,7 +190,7 @@ public class LockAxis extends Activity {
         return super.onKeyDown(keyCode, event);
     }
     
-    public void setWristMode() {
+    private void setWristMode() {
     	xBox.setChecked(true);
     	xBox.setEnabled(false);
     	xBox.setTextColor(Color.GRAY);
@@ -259,7 +259,7 @@ public class LockAxis extends Activity {
     	MainActivity.armMode = false;
     }
     
-    public void setArmMode() {
+    private void setArmMode() {
     	xBox.setChecked(false);
     	xBox.setEnabled(true);
     	xBox.setTextColor(Color.WHITE);

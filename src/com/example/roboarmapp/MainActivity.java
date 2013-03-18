@@ -40,8 +40,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.Switch;
 
 public class MainActivity extends Activity implements SensorEventListener {
 
@@ -68,6 +71,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	public static SeekBar gripperBar;
 	public static Button myMainButton;
+	public static Switch modeSwitch;
 
 	public static String period = "1000"; // # of ms between tcp/ip data send
 	private static Vibrator v1;
@@ -113,6 +117,32 @@ public class MainActivity extends Activity implements SensorEventListener {
 		
 		rollLocked = true;
 		pitchLocked = true;
+		
+		modeSwitch = (Switch)findViewById(R.id.main_switch);
+		modeSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+		    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		        if (isChecked) { // wrist mode
+		        	if (doSound) {
+		        		if (mp != null) {
+		        			mp.release();
+		        		}
+						mp = MediaPlayer.create(getApplicationContext(), R.raw.wrist_mode);
+						mp.start();
+					}
+		        	setWristMode();
+		        } else { // arm mode
+		        	if (doSound) {
+		        		if (mp != null) {
+		        			mp.release();
+		        		}
+						mp = MediaPlayer.create(getApplicationContext(), R.raw.arm_mode);
+						mp.start();
+					}
+		        	setArmMode();
+		        }
+		    }
+		});
 
 		displacement = new float[3];
 		for (int i = 0; i < 3; i++) {
@@ -305,6 +335,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onResume() {
+		
+		if (armMode) {
+			modeSwitch.setChecked(false);
+		} else {
+			modeSwitch.setChecked(true);
+		}
 
 		if (serverSettingsChanged) {
 			serverSettingsChanged = false;
@@ -640,6 +676,26 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 		});
 	}
+	
+	private void setWristMode() {
+		xAxisLocked = true;
+    	yAxisLocked = true;
+    	zAxisLocked = true;
+    	rollLocked = false;
+    	pitchLocked = false;
+    	
+    	armMode = false;
+    }
+    
+    private void setArmMode() {
+    	xAxisLocked = false;
+    	yAxisLocked = false;
+    	zAxisLocked = false;
+    	rollLocked = true;
+    	pitchLocked = true;
+    	
+    	armMode = true;
+    }
 }
 
 class doSendTimerTask extends TimerTask {
