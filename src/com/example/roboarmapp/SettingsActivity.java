@@ -47,7 +47,7 @@ public class SettingsActivity extends Activity {
 			@Override
 			public void onProgressChanged(SeekBar arg0, int progress,
 					boolean arg2) {
-					MainActivity.sensitivity = progress;
+					MainActivity.sensitivity = 100 - progress;
 			}
 
 			@Override
