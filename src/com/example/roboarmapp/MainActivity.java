@@ -62,7 +62,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static Timer myTimer;
 	public static boolean doVibrate = true;
 	public static boolean doSound = true;
-	
+
 	public static boolean connecting = true;
 
 	public static boolean sensorsStarted = false;
@@ -75,10 +75,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	public static String period = "1000"; // # of ms between tcp/ip data send
 	private static Vibrator v1;
-	
+
 	private static Context mainActivityContext;
 	private static MediaPlayer mp = null;
-	
+
 	public static boolean armMode;
 
 	// Sensors
@@ -106,42 +106,45 @@ public class MainActivity extends Activity implements SensorEventListener {
 		setContentView(R.layout.activity_main);
 
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
-		
+
 		mainActivityContext = this;
-		
+
 		armMode = true;
-		
+
 		xAxisLocked = false;
 		yAxisLocked = false;
 		zAxisLocked = false;
-		
+
 		rollLocked = true;
 		pitchLocked = true;
-		
-		modeSwitch = (Switch)findViewById(R.id.main_switch);
+
+		modeSwitch = (Switch) findViewById(R.id.main_switch);
 		modeSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
-		    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-		        if (isChecked) { // wrist mode
-		        	if (doSound) {
-		        		if (mp != null) {
-		        			mp.release();
-		        		}
-						mp = MediaPlayer.create(getApplicationContext(), R.raw.wrist_mode);
+
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				if (isChecked) { // wrist mode
+					if (doSound) {
+						if (mp != null) {
+							mp.release();
+						}
+						mp = MediaPlayer.create(getApplicationContext(),
+								R.raw.wrist_mode);
 						mp.start();
 					}
-		        	setWristMode();
-		        } else { // arm mode
-		        	if (doSound) {
-		        		if (mp != null) {
-		        			mp.release();
-		        		}
-						mp = MediaPlayer.create(getApplicationContext(), R.raw.arm_mode);
+					setWristMode();
+				} else { // arm mode
+					if (doSound) {
+						if (mp != null) {
+							mp.release();
+						}
+						mp = MediaPlayer.create(getApplicationContext(),
+								R.raw.arm_mode);
 						mp.start();
 					}
-		        	setArmMode();
-		        }
-		    }
+					setArmMode();
+				}
+			}
 		});
 
 		displacement = new float[3];
@@ -150,7 +153,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		}
 
 		speed = new float[3];
-		previous_speed = new float [3];
+		previous_speed = new float[3];
 		for (int i = 0; i < 3; i++) {
 			speed[i] = 0.0f;
 			previous_speed[i] = 0.0f;
@@ -158,7 +161,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 		v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 		gripperBar = (SeekBar) findViewById(R.id.gripperBar);
-		myMainButton = (Button) findViewById(R.id.startStopButton);		
+		myMainButton = (Button) findViewById(R.id.startStopButton);
 
 		// check for settings file
 		File fileTest = getFileStreamPath("settings.txt");
@@ -167,7 +170,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 				String entryDelims = "[|]";
 				FileInputStream in = openFileInput("settings.txt");
 				InputStreamReader inputStreamReader = new InputStreamReader(in);
-				BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+				BufferedReader bufferedReader = new BufferedReader(
+						inputStreamReader);
 				String rawInput = bufferedReader.readLine();
 				in.close();
 				String[] entries = rawInput.split(entryDelims);
@@ -208,10 +212,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 				};
 
 				new AlertDialog.Builder(v.getContext())
-				.setMessage(R.string.home_dialog_message)
-				.setPositiveButton(R.string.proceed, listener)
-				.setNegativeButton(R.string.cancel, listener)
-				.setTitle(R.string.home_dialog_title).show();
+						.setMessage(R.string.home_dialog_message)
+						.setPositiveButton(R.string.proceed, listener)
+						.setNegativeButton(R.string.cancel, listener)
+						.setTitle(R.string.home_dialog_title).show();
 			}
 		});
 
@@ -235,15 +239,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 			@Override
 			public void onStopTrackingTouch(SeekBar arg0) {
-				//Log.d("CHECK:", "Current progress is " + grip);
+				// Log.d("CHECK:", "Current progress is " + grip);
 			}
 		});
 
 		final Handler handler = new Handler();
-		final Runnable r = new Runnable()
-		{
-			public void run() 
-			{
+		final Runnable r = new Runnable() {
+			public void run() {
 				checkConnectionStatus();
 				handler.postDelayed(this, 500);
 			}
@@ -276,9 +278,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 			mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 			mAccelerometer = mSensorManager
 					.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-			mOrientation = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+			mOrientation = mSensorManager
+					.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 			mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-			mRotation = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+			mRotation = mSensorManager
+					.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 			mSensorManager.registerListener(this, mAccelerometer,
 					SensorManager.SENSOR_DELAY_NORMAL);
 			mSensorManager.registerListener(this, mOrientation,
@@ -288,8 +292,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 			mSensorManager.registerListener(this, mRotation,
 					SensorManager.SENSOR_DELAY_NORMAL);
 
-			rotationVector = new float [3];
-			acceleration = new float [4];
+			rotationVector = new float[3];
+			acceleration = new float[4];
 			lastMeasurement1 = System.nanoTime();
 			lastMeasurement2 = System.nanoTime();
 			speed[0] = 0;
@@ -310,15 +314,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add("Disconnect").setOnMenuItemClickListener(new OnMenuItemClickListener() {
+		menu.add("Disconnect").setOnMenuItemClickListener(
+				new OnMenuItemClickListener() {
 
-			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				grip = 200; // disconnect signal
-				return false;
-			}
+					@Override
+					public boolean onMenuItemClick(MenuItem item) {
+						grip = 200; // disconnect signal
+						return false;
+					}
 
-		});
+				});
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
@@ -335,7 +340,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onResume() {
-		
+
 		if (armMode) {
 			modeSwitch.setChecked(false);
 		} else {
@@ -413,7 +418,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 			try {
 				mySocket = new Socket();
-				mySocket.connect(new InetSocketAddress(serverIP, Integer.parseInt(serverPort)), 2000);
+				mySocket.connect(
+						new InetSocketAddress(serverIP, Integer
+								.parseInt(serverPort)), 2000);
 				out = mySocket.getOutputStream();
 				in = mySocket.getInputStream();
 				socketConnected = true;
@@ -423,14 +430,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected void onPreExecute() {
 			if (doSound) {
 				if (mp != null) {
 					mp.release();
 				}
-				mp = MediaPlayer.create(getApplicationContext(), R.raw.connecting);
+				mp = MediaPlayer.create(getApplicationContext(),
+						R.raw.connecting);
 				mp.start();
 
 			}
@@ -446,9 +454,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 			if (!socketConnected) {
 				if (doSound) {
 					if (mp != null) {
-	        			mp.release();
-	        		}
-					mp = MediaPlayer.create(getApplicationContext(), R.raw.connection_failed);
+						mp.release();
+					}
+					mp = MediaPlayer.create(getApplicationContext(),
+							R.raw.connection_failed);
 					mp.start();
 
 				}
@@ -463,9 +472,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 			} else {
 				if (doSound) {
 					if (mp != null) {
-	        			mp.release();
-	        		}
-					mp = MediaPlayer.create(getApplicationContext(), R.raw.arm_connected);
+						mp.release();
+					}
+					mp = MediaPlayer.create(getApplicationContext(),
+							R.raw.arm_connected);
 					mp.start();
 
 				}
@@ -484,9 +494,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 							// beep
 							if (doSound) {
 								if (mp != null) {
-				        			mp.release();
-				        		}
-								mp = MediaPlayer.create(getApplicationContext(), R.raw.robot_blip);
+									mp.release();
+								}
+								mp = MediaPlayer.create(
+										getApplicationContext(),
+										R.raw.robot_blip);
 								mp.start();
 
 							}
@@ -562,63 +574,70 @@ public class MainActivity extends Activity implements SensorEventListener {
 				pitchAngle = pitchAngle + pitch;
 			}
 
-			//Log.d("CHECK: ", "The current roll value is " + rollAngle * 360 /	2 / Math.PI);
+			// Log.d("CHECK: ", "The current roll value is " + rollAngle * 360 /
+			// 2 / Math.PI);
 
 			// float[] outFloatData = { rollAngle, pitchAngle, 0, 0, 0, grip };
 			// doSend(outFloatData);
 		}
 
 		if (event.sensor.equals(mAccelerometer)) {
-			float [] rawLinear = { event.values[0], event.values[1],
+			float[] rawLinear = { event.values[0], event.values[1],
 					event.values[2], 0 };
-			for (int i = 0; i<3; i++) {
+			for (int i = 0; i < 3; i++) {
 				if (rawLinear[i] < 0.2 && rawLinear[i] > -0.2) {
 					rawLinear[i] = 0;
 				}
 			}
-			float [] temp = new float [16];
-			rotationMatrix = new float [16];
+			float[] temp = new float[16];
+			rotationMatrix = new float[16];
 			SensorManager.getRotationMatrixFromVector(temp, rotationVector);
 			Matrix.invertM(rotationMatrix, 0, temp, 0);
 			Matrix.multiplyMV(acceleration, 0, rotationMatrix, 0, rawLinear, 0);
-			//Log.d("CHECK:", "x = " + acceleration[0] + "; y = " + acceleration[1] + "; z = " + acceleration[2]);
+			// Log.d("CHECK:", "x = " + acceleration[0] + "; y = " +
+			// acceleration[1] + "; z = " + acceleration[2]);
 			long timeInterval = event.timestamp - lastMeasurement1;
 			lastMeasurement1 = event.timestamp;
 
 			if (!xAxisLocked) {
-				speed[0] = (float) (acceleration[0] * timeInterval * NS2S) + speed[0];
+				speed[0] = (float) (acceleration[0] * timeInterval * NS2S)
+						+ speed[0];
 				if (speed[0] > 0 && previous_speed[0] < 0) {
 					speed[0] = 0;
-				}
-				else if (speed[0] < 0 && previous_speed[0] > 0) {
+				} else if (speed[0] < 0 && previous_speed[0] > 0) {
 					speed[0] = 0;
 				}
-				displacement[0] = (float) (speed[0] * timeInterval * NS2S) + displacement[0];
+				displacement[0] = (float) (speed[0] * timeInterval * NS2S)
+						+ displacement[0];
 			}
 
 			if (!yAxisLocked) {
-				speed[1] = (float) (acceleration[1] * timeInterval * NS2S) + speed[1];
+				speed[1] = (float) (acceleration[1] * timeInterval * NS2S)
+						+ speed[1];
 				if (speed[1] > 0 && previous_speed[1] < 0) {
 					speed[1] = 0;
-				}
-				else if (speed[1] < 0 && previous_speed[1] > 0) {
+				} else if (speed[1] < 0 && previous_speed[1] > 0) {
 					speed[1] = 0;
 				}
-				displacement[1] = (float) (speed[1] * timeInterval * NS2S) + displacement[1];
+				displacement[1] = (float) (speed[1] * timeInterval * NS2S)
+						+ displacement[1];
+				displacement[1] = -displacement[1];
 			}
 
 			if (!zAxisLocked) {
-				speed[2] = (float) (acceleration[2] * timeInterval * NS2S) + speed[2];
+				speed[2] = (float) (acceleration[2] * timeInterval * NS2S)
+						+ speed[2];
 				if (speed[2] > 0 && previous_speed[2] < 0) {
 					speed[2] = 0;
-				}
-				else if (speed[2] < 0 && previous_speed[2] > 0) {
+				} else if (speed[2] < 0 && previous_speed[2] > 0) {
 					speed[2] = 0;
 				}
-				displacement[2] = (float) (speed[2] * timeInterval * NS2S) + displacement[2];
-				previous_speed = speed;
+				displacement[2] = (float) (speed[2] * timeInterval * NS2S)
+						+ displacement[2];
 			}
-			//Log.d("CHECK:", "x = " + displacement[0] + "; y = " + displacement[1] + "; z = " + displacement[2]);
+			previous_speed = speed;
+			// Log.d("CHECK:", "x = " + displacement[0] + "; y = " +
+			// displacement[1] + "; z = " + displacement[2]);
 		}
 
 		if (event.sensor.equals(mRotation)) {
@@ -626,7 +645,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		}
 
 	}
-	
+
 	public static void disconnectFromServer() {
 		if (socketConnected) {
 			socketConnected = false;
@@ -641,20 +660,20 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 			if (doSound) {
 				if (mp != null) {
-        			mp.release();
-        		}
-				mp = MediaPlayer.create(mainActivityContext, R.raw.arm_disconnected);
+					mp.release();
+				}
+				mp = MediaPlayer.create(mainActivityContext,
+						R.raw.arm_disconnected);
 				mp.start();
 			}
 		}
 	}
 
 	protected void checkConnectionStatus() {
-		runOnUiThread(new Runnable() 
-		{
-			public void run() 
-			{
-				if ((!socketConnected) && (!connecting) && (!reconnectButtonSet) && (!serverIP.equals(""))) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				if ((!socketConnected) && (!connecting)
+						&& (!reconnectButtonSet) && (!serverIP.equals(""))) {
 					stopSensors();
 					gripperBar.setEnabled(false);
 					myMainButton.setText(R.string.connect_error);
@@ -668,34 +687,36 @@ public class MainActivity extends Activity implements SensorEventListener {
 									v1.vibrate(50);
 								}
 								new ConnectToServer().execute();
-							}}
+							}
+							}
 							return true;
-						}});
+						}
+					});
 					reconnectButtonSet = true;
 				}
 			}
 		});
 	}
-	
+
 	private void setWristMode() {
 		xAxisLocked = true;
-    	yAxisLocked = true;
-    	zAxisLocked = true;
-    	rollLocked = false;
-    	pitchLocked = false;
-    	
-    	armMode = false;
-    }
-    
-    private void setArmMode() {
-    	xAxisLocked = false;
-    	yAxisLocked = false;
-    	zAxisLocked = false;
-    	rollLocked = true;
-    	pitchLocked = true;
-    	
-    	armMode = true;
-    }
+		yAxisLocked = true;
+		zAxisLocked = true;
+		rollLocked = false;
+		pitchLocked = false;
+
+		armMode = false;
+	}
+
+	private void setArmMode() {
+		xAxisLocked = false;
+		yAxisLocked = false;
+		zAxisLocked = false;
+		rollLocked = true;
+		pitchLocked = true;
+
+		armMode = true;
+	}
 }
 
 class doSendTimerTask extends TimerTask {
@@ -708,20 +729,29 @@ class doSendTimerTask extends TimerTask {
 			} else if (MainActivity.grip == 300) {
 				homeCase = true;
 			}
-			//Log.d("x displacement", "" + MainActivity.displacement[0]);
+			// Log.d("x displacement", "" + MainActivity.displacement[0]);
 			for (int i = 0; i < 3; i++) {
-				MainActivity.displacement[i] = MainActivity.displacement[i] / (1.0f + (float)(MainActivity.sensitivity / 25.0f));
+				MainActivity.displacement[i] = MainActivity.displacement[i]
+						/ (1.0f + (float) (MainActivity.sensitivity / 25.0f));
 			}
-			float[] outFloatData = { MainActivity.rollAngle, MainActivity.pitchAngle, MainActivity.displacement[0], MainActivity.displacement[1], MainActivity.displacement[2], MainActivity.grip };
-			//Log.d("CHECK:", "x = " + MainActivity.displacement[0] + "; y = " + MainActivity.displacement[1] + "; z = " + MainActivity.displacement[2]);
+			float[] outFloatData = { MainActivity.rollAngle,
+					MainActivity.pitchAngle, MainActivity.displacement[0],
+					MainActivity.displacement[1], MainActivity.displacement[2],
+					MainActivity.grip };
+			if (MainActivity.displacement[0] != 0
+					|| MainActivity.displacement[1] != 0
+					|| MainActivity.displacement[2] != 0) {
+				Log.d("CHECK:", "x = " + MainActivity.displacement[0]
+						+ "; y = " + MainActivity.displacement[1] + "; z = "
+						+ MainActivity.displacement[2]);
+			}
 
 			MainActivity.displacement[0] = 0.0f;
 			MainActivity.displacement[1] = 0.0f;
 			MainActivity.displacement[2] = 0.0f;
-			//MainActivity.speed[0] = 0.0f;
-			//MainActivity.speed[1] = 0.0f;
-			//MainActivity.speed[2] = 0.0f;
-
+			// MainActivity.speed[0] = 0.0f;
+			// MainActivity.speed[1] = 0.0f;
+			// MainActivity.speed[2] = 0.0f;
 
 			for (int i = 0; i < outFloatData.length; i++) {
 				int data = Float.floatToRawIntBits(outFloatData[i]);
@@ -749,7 +779,14 @@ class doSendTimerTask extends TimerTask {
 				MainActivity.disconnectFromServer();
 			}
 		} else {
-			MainActivity.grip = MainActivity.gripperBar.getProgress(); // reset Home or Disconnect signals if not connected
+			MainActivity.grip = MainActivity.gripperBar.getProgress(); // reset
+																		// Home
+																		// or
+																		// Disconnect
+																		// signals
+																		// if
+																		// not
+																		// connected
 		}
 	}
 }
