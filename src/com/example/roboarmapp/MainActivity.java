@@ -64,6 +64,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static boolean doSound = true;
 
 	public static boolean connecting = true;
+	public static boolean tracking = false;
 
 	public static boolean sensorsStarted = false;
 	public static boolean reconnectButtonSet = false;
@@ -85,7 +86,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private SensorManager mSensorManager;
 	private long lastMeasurement1, lastMeasurement2;
 	private Sensor mAccelerometer, mOrientation, mGyroscope, mRotation;
-	private boolean reference;
 	private static final float NS2S = 1.0f / 1000000000.0f;
 	public static float[] rotationVector;
 	public static float[] rotationMatrix;
@@ -95,8 +95,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static float[] displacement;
 	public static float rollAngle = 0;
 	public static float pitchAngle = 0;
-	private float referenceRoll;
-	private float referencePitch;
 	public static float grip = 0.0f;
 	public static int sensitivity = 0;
 
@@ -264,17 +262,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 					SensorManager.SENSOR_DELAY_NORMAL);
 			mSensorManager.registerListener(this, mRotation,
 					SensorManager.SENSOR_DELAY_NORMAL);
-
-			rotationVector = new float[3];
-			acceleration = new float[4];
-			lastMeasurement1 = System.nanoTime();
-			lastMeasurement2 = System.nanoTime();
-			speed[0] = 0;
-			speed[1] = 0;
-			speed[2] = 0;
-			reference = true;
-			// rollAngle = 0;
-			// pitchAngle = 0;
 		}
 	}
 
@@ -315,6 +302,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public void onResume() {
 
 		modeSwitch.setOnCheckedChangeListener(null);
+		
+		startSensors();
 		
 		if (armMode) {
 			modeSwitch.setChecked(false);
@@ -373,6 +362,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onPause() {
+		stopSensors();
 		myTimer.cancel();
 		myTimer.purge();
 		super.onPause();
@@ -516,8 +506,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 							Button lockButton = (Button) findViewById(R.id.lockButton);
 							homeButton.setEnabled(false);
 							lockButton.setEnabled(false);
-							startSensors();
 							setOnMainButton();
+							
+							tracking = true;
+							rotationVector = new float[3];
+							acceleration = new float[4];
+							lastMeasurement1 = System.nanoTime();
+							lastMeasurement2 = System.nanoTime();
+							speed[0] = 0;
+							speed[1] = 0;
+							speed[2] = 0;
 
 							return true;
 						}
@@ -529,9 +527,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 							Button lockButton = (Button) findViewById(R.id.lockButton);
 							homeButton.setEnabled(true);
 							lockButton.setEnabled(true);
-							stopSensors();
 							resetMainButton();
 							v1.cancel();
+							tracking = false;
 
 							return true;
 						}
@@ -554,7 +552,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		if (event.sensor.equals(mGyroscope)) {
+		if (event.sensor.equals(mGyroscope) && tracking) {
 			float roll = event.values[1]; // around axis y
 			float pitch = event.values[0]; // around axis x
 			if (roll < 0.005 && roll > -0.005) {
@@ -584,7 +582,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			// doSend(outFloatData);
 		}
 
-		if (event.sensor.equals(mAccelerometer)) {
+		if (event.sensor.equals(mAccelerometer) && tracking) {
 			float[] rawLinear = { event.values[0], event.values[1],
 					event.values[2], 0 };
 			for (int i = 0; i < 3; i++) {
@@ -642,7 +640,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			// displacement[1] + "; z = " + displacement[2]);
 		}
 
-		if (event.sensor.equals(mRotation)) {
+		if (event.sensor.equals(mRotation) && tracking) {
 			rotationVector = event.values;
 		}
 
@@ -675,7 +673,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 			public void run() {
 				if ((!socketConnected) && (!connecting)
 						&& (!reconnectButtonSet) && (!serverIP.equals(""))) {
-					stopSensors();
 					gripperBar.setEnabled(false);
 					myMainButton.setText(R.string.connect_error);
 					myMainButton.setBackgroundColor(Color.YELLOW);
@@ -750,6 +747,8 @@ class doSendTimerTask extends TimerTask {
 			MainActivity.displacement[0] = 0.0f;
 			MainActivity.displacement[1] = 0.0f;
 			MainActivity.displacement[2] = 0.0f;
+			MainActivity.rollAngle = 0;
+			MainActivity.pitchAngle = 0;
 			// MainActivity.speed[0] = 0.0f;
 			// MainActivity.speed[1] = 0.0f;
 			// MainActivity.speed[2] = 0.0f;
