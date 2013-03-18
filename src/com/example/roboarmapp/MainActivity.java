@@ -183,6 +183,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 						if (which == Dialog.BUTTON_POSITIVE) {
 							rollAngle = 0;
 							pitchAngle = 0;
+							displacement[0] = 0.0f;
+							displacement[1] = 0.0f;
+							displacement[2] = 0.0f;
 							grip = 300; // home signal
 							gripperBar.setProgress(0);
 						}
