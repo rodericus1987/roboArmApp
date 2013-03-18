@@ -249,9 +249,11 @@ public class LockAxis extends Activity {
 					case MotionEvent.ACTION_UP: {
 						if (!rollBox.isChecked()) {
 							MainActivity.rollLocked = true;
+							MainActivity.rollBoxChecked = true;
 							rollBox.setChecked(true);
 						} else {
 							MainActivity.rollLocked = false;
+							MainActivity.rollBoxChecked = false;
 							rollBox.setChecked(false);
 						}
 					}
@@ -267,9 +269,11 @@ public class LockAxis extends Activity {
 					case MotionEvent.ACTION_UP: {
 						if (!pitchBox.isChecked()) {
 							MainActivity.pitchLocked = true;
+							MainActivity.pitchBoxChecked = true;
 							pitchBox.setChecked(true);
 						} else {
 							MainActivity.pitchLocked = false;
+							MainActivity.pitchBoxChecked = false;
 							pitchBox.setChecked(false);
 						}
 					}
