@@ -78,28 +78,40 @@ public class LockAxis extends Activity {
 		rollImg = (ImageView)findViewById(R.id.roll);
 		pitchImg = (ImageView)findViewById(R.id.pitch);
 		
-		if (MainActivity.xAxisLocked) {
+		if (MainActivity.xBoxChecked) {
 			xBox.setChecked(true);
+		} else {
+			xBox.setChecked(false);
 		}
-		if (MainActivity.yAxisLocked) {
+		if (MainActivity.yBoxChecked) {
 			yBox.setChecked(true);
+		} else {
+			yBox.setChecked(false);
 		}
-		if (MainActivity.zAxisLocked) {
+		if (MainActivity.zBoxChecked) {
 			zBox.setChecked(true);
+		} else {
+			zBox.setChecked(false);
 		}
-		if (MainActivity.rollLocked) {
+		if (MainActivity.rollBoxChecked) {
 			rollBox.setChecked(true);
+		} else {
+			rollBox.setChecked(false);
 		}
-		if (MainActivity.pitchLocked) {
+		if (MainActivity.pitchBoxChecked) {
 			pitchBox.setChecked(true);
+		} else {
+			pitchBox.setChecked(false);
 		}
 		xBox.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (((CheckBox) v).isChecked()) {
 					MainActivity.xAxisLocked = true;
+					MainActivity.xBoxChecked = true;
 				} else {
 					MainActivity.xAxisLocked = false;
+					MainActivity.xBoxChecked = false;
 				}
 			}
 		});
@@ -108,8 +120,10 @@ public class LockAxis extends Activity {
 			public void onClick(View v) {
 				if (((CheckBox) v).isChecked()) {
 					MainActivity.yAxisLocked = true;
+					MainActivity.yBoxChecked = true;
 				} else {
 					MainActivity.yAxisLocked = false;
+					MainActivity.yBoxChecked = false;
 				}
 			}
 		});
@@ -118,8 +132,10 @@ public class LockAxis extends Activity {
 			public void onClick(View v) {
 				if (((CheckBox) v).isChecked()) {
 					MainActivity.zAxisLocked = true;
+					MainActivity.zBoxChecked = true;
 				} else {
 					MainActivity.zAxisLocked = false;
+					MainActivity.zBoxChecked = false;
 				}
 			}
 		});
@@ -128,8 +144,10 @@ public class LockAxis extends Activity {
 			public void onClick(View v) {
 				if (((CheckBox) v).isChecked()) {
 					MainActivity.rollLocked = true;
+					MainActivity.rollBoxChecked = true;
 				} else {
 					MainActivity.rollLocked = false;
+					MainActivity.rollBoxChecked = false;
 				}
 			}
 		});
@@ -138,8 +156,10 @@ public class LockAxis extends Activity {
 			public void onClick(View v) {
 				if (((CheckBox) v).isChecked()) {
 					MainActivity.pitchLocked = true;
+					MainActivity.pitchBoxChecked = true;
 				} else {
 					MainActivity.pitchLocked = false;
+					MainActivity.pitchBoxChecked = false;
 				}
 			}
 		});
@@ -191,30 +211,36 @@ public class LockAxis extends Activity {
     }
     
     private void setWristMode() {
-    	xBox.setChecked(true);
+    	//xBox.setChecked(true);
     	xBox.setEnabled(false);
     	xBox.setTextColor(Color.GRAY);
     	MainActivity.xAxisLocked = true;
     	
-    	yBox.setChecked(true);
+    	//yBox.setChecked(true);
     	yBox.setEnabled(false);
     	yBox.setTextColor(Color.GRAY);
     	MainActivity.yAxisLocked = true;
     	
-    	zBox.setChecked(true);
+    	//zBox.setChecked(true);
     	zBox.setEnabled(false);
     	zBox.setTextColor(Color.GRAY);
     	MainActivity.zAxisLocked = true;
     	
-    	rollBox.setChecked(false);
     	rollBox.setEnabled(true);
     	rollBox.setTextColor(Color.WHITE);
-    	MainActivity.rollLocked = false;
+    	if (rollBox.isChecked()) {
+    		MainActivity.rollLocked = true;
+    	} else {
+    		MainActivity.rollLocked = false;
+    	}
     	
-    	pitchBox.setChecked(false);
     	pitchBox.setEnabled(true);
     	pitchBox.setTextColor(Color.WHITE);
-    	MainActivity.pitchLocked = false;
+    	if (pitchBox.isChecked()) {
+    		MainActivity.pitchLocked = true;
+    	} else {
+    		MainActivity.pitchLocked = false;
+    	}
     	
     	rollImg.setOnTouchListener(new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
@@ -260,27 +286,36 @@ public class LockAxis extends Activity {
     }
     
     private void setArmMode() {
-    	xBox.setChecked(false);
     	xBox.setEnabled(true);
     	xBox.setTextColor(Color.WHITE);
-    	MainActivity.xAxisLocked = false;
+    	if (xBox.isChecked()) {
+    		MainActivity.xAxisLocked = true;
+    	} else {
+    		MainActivity.xAxisLocked = false;
+    	}
     	
-    	yBox.setChecked(false);
     	yBox.setEnabled(true);
     	yBox.setTextColor(Color.WHITE);
-    	MainActivity.yAxisLocked = false;
+    	if (yBox.isChecked()) {
+    		MainActivity.yAxisLocked = true;
+    	} else {
+    		MainActivity.yAxisLocked = false;
+    	}
     	
-    	zBox.setChecked(false);
     	zBox.setEnabled(true);
     	zBox.setTextColor(Color.WHITE);
-    	MainActivity.zAxisLocked = false;
+    	if (zBox.isChecked()) {
+    		MainActivity.zAxisLocked = true;
+    	} else {
+    		MainActivity.zAxisLocked = false;
+    	}
     	
-    	rollBox.setChecked(true);
+    	//rollBox.setChecked(true);
     	rollBox.setEnabled(false);
     	rollBox.setTextColor(Color.GRAY);
     	MainActivity.rollLocked = true;
     	
-    	pitchBox.setChecked(true);
+    	//pitchBox.setChecked(true);
     	pitchBox.setEnabled(false);
     	pitchBox.setTextColor(Color.GRAY);
     	MainActivity.pitchLocked = true;

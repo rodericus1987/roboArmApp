@@ -53,6 +53,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static boolean zAxisLocked;
 	public static boolean rollLocked;
 	public static boolean pitchLocked;
+	public static boolean xBoxChecked = false;
+	public static boolean yBoxChecked = false;
+	public static boolean zBoxChecked = false;
+	public static boolean rollBoxChecked = false;
+	public static boolean pitchBoxChecked = false;
 	public static String serverIP = "";
 	public static String serverPort = "4012";
 	public static Socket mySocket;
@@ -700,16 +705,36 @@ public class MainActivity extends Activity implements SensorEventListener {
 		xAxisLocked = true;
 		yAxisLocked = true;
 		zAxisLocked = true;
-		rollLocked = false;
-		pitchLocked = false;
+		if (rollBoxChecked) {
+			rollLocked = true;
+		} else {
+			rollLocked = false;
+		}
+		if (pitchBoxChecked) {
+			pitchLocked = true;
+		} else {
+			pitchLocked = false;
+		}
 
 		armMode = false;
 	}
 
 	private void setArmMode() {
-		xAxisLocked = false;
-		yAxisLocked = false;
-		zAxisLocked = false;
+		if (xBoxChecked) {
+			xAxisLocked = true;
+		} else {
+			xAxisLocked = false;
+		}
+		if (yBoxChecked) {
+			yAxisLocked = true;
+		} else {
+			yAxisLocked = false;
+		}
+		if (zBoxChecked) {
+			zAxisLocked = true;
+		} else {
+			zAxisLocked = false;
+		}
 		rollLocked = true;
 		pitchLocked = true;
 
