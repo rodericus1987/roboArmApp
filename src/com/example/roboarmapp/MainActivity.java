@@ -119,33 +119,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 		pitchLocked = true;
 
 		modeSwitch = (Switch) findViewById(R.id.main_switch);
-		modeSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-			public void onCheckedChanged(CompoundButton buttonView,
-					boolean isChecked) {
-				if (isChecked) { // wrist mode
-					if (doSound) {
-						if (mp != null) {
-							mp.release();
-						}
-						mp = MediaPlayer.create(getApplicationContext(),
-								R.raw.wrist_mode);
-						mp.start();
-					}
-					setWristMode();
-				} else { // arm mode
-					if (doSound) {
-						if (mp != null) {
-							mp.release();
-						}
-						mp = MediaPlayer.create(getApplicationContext(),
-								R.raw.arm_mode);
-						mp.start();
-					}
-					setArmMode();
-				}
-			}
-		});
 
 		displacement = new float[3];
 		for (int i = 0; i < 3; i++) {
@@ -341,11 +314,41 @@ public class MainActivity extends Activity implements SensorEventListener {
 	@Override
 	public void onResume() {
 
+		modeSwitch.setOnCheckedChangeListener(null);
+		
 		if (armMode) {
 			modeSwitch.setChecked(false);
 		} else {
 			modeSwitch.setChecked(true);
 		}
+		
+		modeSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				if (isChecked) { // wrist mode
+					if (doSound) {
+						if (mp != null) {
+							mp.release();
+						}
+						mp = MediaPlayer.create(getApplicationContext(),
+								R.raw.wrist_mode);
+						mp.start();
+					}
+					setWristMode();
+				} else { // arm mode
+					if (doSound) {
+						if (mp != null) {
+							mp.release();
+						}
+						mp = MediaPlayer.create(getApplicationContext(),
+								R.raw.arm_mode);
+						mp.start();
+					}
+					setArmMode();
+				}
+			}
+		});
 
 		if (serverSettingsChanged) {
 			serverSettingsChanged = false;
@@ -662,8 +665,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 				if (mp != null) {
 					mp.release();
 				}
-				mp = MediaPlayer.create(mainActivityContext,
-						R.raw.arm_disconnected);
+				mp = MediaPlayer.create(mainActivityContext, R.raw.arm_disconnected);
 				mp.start();
 			}
 		}
@@ -779,14 +781,7 @@ class doSendTimerTask extends TimerTask {
 				MainActivity.disconnectFromServer();
 			}
 		} else {
-			MainActivity.grip = MainActivity.gripperBar.getProgress(); // reset
-																		// Home
-																		// or
-																		// Disconnect
-																		// signals
-																		// if
-																		// not
-																		// connected
+			MainActivity.grip = MainActivity.gripperBar.getProgress(); // reset Home or Disconnect signals if not connected
 		}
 	}
 }
