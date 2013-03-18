@@ -77,6 +77,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	public static SeekBar gripperBar;
 	public static Button myMainButton;
+	public static Button homeButton;
+	public static Button lockButton;
 	public static Switch modeSwitch;
 
 	public static String period = "1000"; // # of ms between tcp/ip data send
@@ -172,7 +174,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 		}
 
-		Button homeButton = (Button) findViewById(R.id.homeButton);
+		homeButton = (Button) findViewById(R.id.homeButton);
 		homeButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -194,6 +196,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 						.setTitle(R.string.home_dialog_title).show();
 			}
 		});
+		
+		lockButton = (Button) findViewById(R.id.lockButton);
 
 		gripperBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
@@ -507,8 +511,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 							}
 
 							gripperBar.setEnabled(false);
-							Button homeButton = (Button) findViewById(R.id.homeButton);
-							Button lockButton = (Button) findViewById(R.id.lockButton);
 							homeButton.setEnabled(false);
 							lockButton.setEnabled(false);
 							setOnMainButton();
@@ -528,8 +530,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 						case MotionEvent.ACTION_UP: {
 
 							gripperBar.setEnabled(true);
-							Button homeButton = (Button) findViewById(R.id.homeButton);
-							Button lockButton = (Button) findViewById(R.id.lockButton);
 							homeButton.setEnabled(true);
 							lockButton.setEnabled(true);
 							resetMainButton();
@@ -652,6 +652,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	}
 
 	public static void disconnectFromServer() {
+		homeButton.setEnabled(true);
+		lockButton.setEnabled(true);
 		if (socketConnected) {
 			socketConnected = false;
 			try {
