@@ -624,7 +624,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 				}
 				displacement[1] = (float) (speed[1] * timeInterval * NS2S)
 						+ displacement[1];
-				displacement[1] = -displacement[1];
 			}
 
 			if (!zAxisLocked) {
