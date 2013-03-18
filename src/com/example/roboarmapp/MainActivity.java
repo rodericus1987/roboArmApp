@@ -152,6 +152,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 				if (entries[4].equals("0")) {
 					doSound = false;
 				}
+				sensitivity = Integer.parseInt(entries[5]);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

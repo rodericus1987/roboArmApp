@@ -41,6 +41,7 @@ public class SettingsActivity extends Activity {
 		sendRateText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
 		
 		sensitivityBar = (SeekBar)findViewById(R.id.sensitivity);
+		sensitivityBar.setProgress(MainActivity.sensitivity);
 		sensitivityBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
 			@Override
@@ -146,6 +147,7 @@ public class SettingsActivity extends Activity {
 	
 	@Override
 	public void onPause() {
+		updateSettings();
 		File fileTest = getFileStreamPath("settings.txt");
 		if (fileTest.exists()) {
 			fileTest.delete();
@@ -170,6 +172,8 @@ public class SettingsActivity extends Activity {
 			} else {
 				entry += "0";
 			}
+			entry += "|";
+			entry += "" + MainActivity.sensitivity;
 			out.write(entry.getBytes());
 			out.getFD().sync();
 			out.close();
@@ -188,7 +192,6 @@ public class SettingsActivity extends Activity {
 	{
 	    if ((keyCode == KeyEvent.KEYCODE_BACK))
 	    {
-	    	updateSettings();
 	        finish();
 	    }
 	    return super.onKeyDown(keyCode, event);
@@ -205,7 +208,6 @@ public class SettingsActivity extends Activity {
 			//
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
-			updateSettings();
 			finish();
 			return true;
 		}
