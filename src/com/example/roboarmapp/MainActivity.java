@@ -45,11 +45,11 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class MainActivity extends Activity implements SensorEventListener {
 
-	public static boolean xAxisLocked = false;
-	public static boolean yAxisLocked = false;
-	public static boolean zAxisLocked = false;
-	public static boolean rollLocked = false;
-	public static boolean pitchLocked = false;
+	public static boolean xAxisLocked;
+	public static boolean yAxisLocked;
+	public static boolean zAxisLocked;
+	public static boolean rollLocked;
+	public static boolean pitchLocked;
 	public static String serverIP = "";
 	public static String serverPort = "4012";
 	public static Socket mySocket;
@@ -59,6 +59,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static Timer myTimer;
 	public static boolean doVibrate = true;
 	public static boolean doSound = true;
+	
+	public static boolean connecting = true;
 
 	public static boolean sensorsStarted = false;
 	public static boolean reconnectButtonSet = false;
@@ -71,6 +73,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static Vibrator v1;
 	
 	private static Context mainActivityContext;
+	private static MediaPlayer mp = null;
+	
+	public static boolean armMode;
 
 	// Sensors
 	private SensorManager mSensorManager;
@@ -99,6 +104,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		
 		mainActivityContext = this;
+		
+		armMode = true;
+		
+		xAxisLocked = false;
+		yAxisLocked = false;
+		zAxisLocked = false;
+		
+		rollLocked = true;
+		pitchLocked = true;
 
 		displacement = new float[3];
 		for (int i = 0; i < 3; i++) {
@@ -302,9 +316,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 			myMainButton.setText(R.string.no_ip);
 			myMainButton.setOnTouchListener(null);
 		} else if (!socketConnected) {
-			gripperBar.setEnabled(false);
-			myMainButton.setBackgroundColor(Color.YELLOW);
-			myMainButton.setText(R.string.connecting);
 			new ConnectToServer().execute();
 		}
 
@@ -362,12 +373,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 		@Override
 		protected Void doInBackground(Void... arg0) {
 			Log.d("DEBUG: ", "Before connection");
-			
-			/*if (doSound) {
-				MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.connecting);
-				mp.start();
-
-			}*/
 
 			try {
 				mySocket = new Socket();
@@ -381,12 +386,32 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 			return null;
 		}
+		
+		@Override
+		protected void onPreExecute() {
+			if (doSound) {
+				if (mp != null) {
+					mp.release();
+				}
+				mp = MediaPlayer.create(getApplicationContext(), R.raw.connecting);
+				mp.start();
+
+			}
+			gripperBar.setEnabled(false);
+			myMainButton.setBackgroundColor(Color.YELLOW);
+			myMainButton.setText(R.string.connecting);
+			myMainButton.setOnTouchListener(null);
+			connecting = true;
+		}
 
 		@Override
 		protected void onPostExecute(Void result) {
 			if (!socketConnected) {
 				if (doSound) {
-					MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.connection_failed);
+					if (mp != null) {
+	        			mp.release();
+	        		}
+					mp = MediaPlayer.create(getApplicationContext(), R.raw.connection_failed);
 					mp.start();
 
 				}
@@ -400,7 +425,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 				}
 			} else {
 				if (doSound) {
-					MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.arm_connected);
+					if (mp != null) {
+	        			mp.release();
+	        		}
+					mp = MediaPlayer.create(getApplicationContext(), R.raw.arm_connected);
 					mp.start();
 
 				}
@@ -418,7 +446,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 							// beep
 							if (doSound) {
-								MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.robot_blip);
+								if (mp != null) {
+				        			mp.release();
+				        		}
+								mp = MediaPlayer.create(getApplicationContext(), R.raw.robot_blip);
 								mp.start();
 
 							}
@@ -459,6 +490,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					}
 				});
 			}
+			connecting = false;
 		}
 	}
 
@@ -571,9 +603,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 				e.printStackTrace();
 			}
 			if (doSound) {
-				MediaPlayer mp = MediaPlayer.create(mainActivityContext, R.raw.arm_disconnected);
+				if (mp != null) {
+        			mp.release();
+        		}
+				mp = MediaPlayer.create(mainActivityContext, R.raw.arm_disconnected);
 				mp.start();
-
 			}
 		}
 	}
@@ -583,7 +617,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		{
 			public void run() 
 			{
-				if ((!socketConnected) && (!reconnectButtonSet) && (!serverIP.equals(""))) {
+				if ((!socketConnected) && (!connecting) && (!reconnectButtonSet) && (!serverIP.equals(""))) {
 					stopSensors();
 					gripperBar.setEnabled(false);
 					myMainButton.setText(R.string.connect_error);
@@ -596,9 +630,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 								if (doVibrate) {
 									v1.vibrate(50);
 								}
-								myMainButton.setText(R.string.connecting);
 								new ConnectToServer().execute();
-								myMainButton.setOnTouchListener(null);
 							}}
 							return true;
 						}});
@@ -644,15 +676,7 @@ class doSendTimerTask extends TimerTask {
 				try {
 					MainActivity.out.write(outByteData);
 				} catch (IOException e) {
-					MainActivity.socketConnected = false;
-					try {
-						MainActivity.out.close();
-						MainActivity.in.close();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					e.printStackTrace();
+					MainActivity.disconnectFromServer();
 				}
 			}
 			try {
@@ -665,15 +689,7 @@ class doSendTimerTask extends TimerTask {
 					MainActivity.grip = MainActivity.gripperBar.getProgress();
 				}
 			} catch (IOException e) {
-				MainActivity.socketConnected = false;
-				try {
-					MainActivity.out.close();
-					MainActivity.in.close();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				e.printStackTrace();
+				MainActivity.disconnectFromServer();
 			}
 		} else {
 			MainActivity.grip = MainActivity.gripperBar.getProgress(); // reset Home or Disconnect signals if not connected

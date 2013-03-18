@@ -16,5 +16,9 @@
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
+    
+    <style name="SwitchText" parent="@android:style/TextAppearance.Large">
+        <item name="android:textColor">#FFFFFF</item>
+  	</style>
 
 </resources>

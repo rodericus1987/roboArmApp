@@ -21,36 +21,40 @@ public final class R {
         public static final int lock_icon_axis_pressed_sml=0x7f020007;
         public static final int lock_icon_axis_sml=0x7f020008;
         public static final int pitch_icon=0x7f020009;
-        public static final int roll_icon=0x7f02000a;
-        public static final int white_axis=0x7f02000b;
-        public static final int white_axis_dbl=0x7f02000c;
+        public static final int pitch_icon_gray=0x7f02000a;
+        public static final int roll_icon=0x7f02000b;
+        public static final int roll_icon_gray=0x7f02000c;
+        public static final int white_axis=0x7f02000d;
+        public static final int white_axis_dbl=0x7f02000e;
+        public static final int white_axis_dbl_gray=0x7f02000f;
     }
     public static final class id {
         public static final int axis=0x7f080000;
-        public static final int doneButton=0x7f080004;
-        public static final int editIP=0x7f080010;
-        public static final int editPort=0x7f080011;
-        public static final int editSendRate=0x7f080012;
-        public static final int gripperBar=0x7f08000f;
-        public static final int gripperClosed=0x7f08000e;
-        public static final int gripperOpen=0x7f08000d;
-        public static final int gripperText=0x7f08000c;
-        public static final int homeButton=0x7f08000a;
-        public static final int lockButton=0x7f08000b;
-        public static final int lockPitch=0x7f080008;
-        public static final int lockRoll=0x7f080006;
-        public static final int lockXAxis=0x7f080003;
+        public static final int doneButton=0x7f080001;
+        public static final int editIP=0x7f080011;
+        public static final int editPort=0x7f080012;
+        public static final int editSendRate=0x7f080013;
+        public static final int gripperBar=0x7f080010;
+        public static final int gripperClosed=0x7f08000f;
+        public static final int gripperOpen=0x7f08000e;
+        public static final int gripperText=0x7f08000d;
+        public static final int homeButton=0x7f08000b;
+        public static final int lockButton=0x7f08000c;
+        public static final int lockPitch=0x7f080007;
+        public static final int lockRoll=0x7f080005;
+        public static final int lockXAxis=0x7f080008;
         public static final int lockYAxis=0x7f080002;
-        public static final int lockZAxis=0x7f080001;
-        public static final int menu_settings=0x7f080018;
-        public static final int pitch=0x7f080007;
-        public static final int roll=0x7f080005;
-        public static final int sensitivity=0x7f080013;
-        public static final int sound=0x7f080017;
-        public static final int sound_text=0x7f080016;
-        public static final int startStopButton=0x7f080009;
-        public static final int vibration=0x7f080015;
-        public static final int vibration_text=0x7f080014;
+        public static final int lockZAxis=0x7f080003;
+        public static final int menu_settings=0x7f080019;
+        public static final int pitch=0x7f080006;
+        public static final int roll=0x7f080004;
+        public static final int sensitivity=0x7f080014;
+        public static final int sound=0x7f080018;
+        public static final int sound_text=0x7f080017;
+        public static final int startStopButton=0x7f08000a;
+        public static final int switch1=0x7f080009;
+        public static final int vibration=0x7f080016;
+        public static final int vibration_text=0x7f080015;
     }
     public static final class layout {
         public static final int activity_lock_axis=0x7f030000;
@@ -66,9 +70,11 @@ public final class R {
     public static final class raw {
         public static final int arm_connected=0x7f040000;
         public static final int arm_disconnected=0x7f040001;
-        public static final int connecting=0x7f040002;
-        public static final int connection_failed=0x7f040003;
-        public static final int robot_blip=0x7f040004;
+        public static final int arm_mode=0x7f040002;
+        public static final int connecting=0x7f040003;
+        public static final int connection_failed=0x7f040004;
+        public static final int robot_blip=0x7f040005;
+        public static final int wrist_mode=0x7f040006;
     }
     public static final class string {
         public static final int app_name=0x7f050000;
@@ -129,5 +135,6 @@ public final class R {
  All customizations that are NOT specific to a particular API-level can go here. 
          */
         public static final int AppTheme=0x7f060001;
+        public static final int SwitchText=0x7f060002;
     }
 }
