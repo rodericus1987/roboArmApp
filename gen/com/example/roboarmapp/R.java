@@ -74,8 +74,9 @@ public final class R {
         public static final int arm_mode=0x7f040002;
         public static final int connecting=0x7f040003;
         public static final int connection_failed=0x7f040004;
-        public static final int robot_blip=0x7f040005;
-        public static final int wrist_mode=0x7f040006;
+        public static final int home=0x7f040005;
+        public static final int robot_blip=0x7f040006;
+        public static final int wrist_mode=0x7f040007;
     }
     public static final class string {
         public static final int app_name=0x7f050000;

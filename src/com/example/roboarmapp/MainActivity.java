@@ -181,6 +181,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (which == Dialog.BUTTON_POSITIVE) {
+							if (doSound) {
+								if (mp != null) {
+									mp.release();
+								}
+								mp = MediaPlayer.create(getApplicationContext(),
+										R.raw.home);
+								mp.start();
+							}
 							rollAngle = 0;
 							pitchAngle = 0;
 							displacement[0] = 0.0f;
