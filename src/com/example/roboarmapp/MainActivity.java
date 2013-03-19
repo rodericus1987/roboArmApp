@@ -215,7 +215,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			@Override
 			public void onProgressChanged(SeekBar arg0, int progress,
 					boolean arg2) {
-				if (grip <= 100) {
+				if ((grip <= 100) && (grip >= 0)) {
 					grip = (float) progress;
 				}
 			}
