@@ -186,7 +186,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 							displacement[0] = 0.0f;
 							displacement[1] = 0.0f;
 							displacement[2] = 0.0f;
-							grip = 300; // home signal
+							grip = -300; // home signal
 							gripperBar.setProgress(0);
 						}
 					}
@@ -754,7 +754,7 @@ class doSendTimerTask extends TimerTask {
 			boolean homeCase = false;
 			if (MainActivity.grip == 200) {
 				disconnectCase = true;
-			} else if (MainActivity.grip == 300) {
+			} else if (MainActivity.grip == -300) {
 				homeCase = true;
 			}
 			// Log.d("x displacement", "" + MainActivity.displacement[0]);
