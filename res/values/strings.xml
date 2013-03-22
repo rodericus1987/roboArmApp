@@ -29,8 +29,11 @@
     <string name="setting_sensitivity">Device movement sensitivity</string>
     <string name="setting_vibration">Enable vibration feedback</string>
     <string name="setting_sound">Enable sounds</string>
-    <string name="setting_LED">Enable LED when A.R.M active</string>
     <string name="setting_accelHZ">Sensor sampling rate</string>
     <string name="playback"><b><u>Playback Control</u></b></string>
+    <string name="delete_one">Delete <b>ONE</b></string>
+    <string name="delete_all">Delete <b>ALL</b></string>
+    <string name="trash_dialog_title">Delete saved positions</string>
+    <string name="trash_dialog_message">Delete previously saved ARM positions</string>
 
 </resources>

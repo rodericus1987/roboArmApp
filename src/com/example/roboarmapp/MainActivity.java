@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -41,10 +42,11 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.SeekBar;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Switch;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements SensorEventListener {
 
@@ -67,6 +69,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static Timer myTimer;
 	public static boolean doVibrate = true;
 	public static boolean doSound = true;
+	
+	private static LinkedList<relativeArmPosition> arm_states;
 
 	public static boolean connecting = true;
 	public static boolean tracking = false;
@@ -88,6 +92,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private static MediaPlayer mp = null;
 
 	public static boolean armMode;
+	
+	public static float[] armMovementTracker;
+	public static int num_saves;
 
 	// Sensors
 	private SensorManager mSensorManager;
@@ -113,6 +120,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		mainActivityContext = this;
+		
+		arm_states = new LinkedList<relativeArmPosition>();
+		armMovementTracker = new float[5];
+		for (int i = 0; i < 5; i++) {
+			armMovementTracker[i] = 0.0f;
+		}
+		num_saves = 0;
 
 		armMode = true;
 
@@ -254,6 +268,129 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private void resetMainButton() {
 		myMainButton.setBackgroundColor(Color.GREEN);
 		myMainButton.setText(R.string.start_stop);
+	}
+	
+	public void recordState(View v) {
+		if (socketConnected) {
+			boolean did_save = false;
+			num_saves++;
+			// if both arm mode and wrist mode have been used, save the two movements as separate events
+			if ((armMovementTracker[0] != 0.0f) || (armMovementTracker[1] != 0.0f) || (armMovementTracker[2] != 0.0f)) {
+				arm_states.add(new relativeArmPosition(armMovementTracker[0], armMovementTracker[1], armMovementTracker[2], 0.0f, 0.0f, grip, num_saves));
+				did_save = true;
+			}
+			
+			if ((armMovementTracker[3] != 0.0f) || (armMovementTracker[4] != 0.0f)) {
+				arm_states.add(new relativeArmPosition(0.0f, 0.0f, 0.0f, armMovementTracker[3], armMovementTracker[4], grip, num_saves));
+				did_save = true;
+			}
+			
+			if (!did_save) {
+				if (arm_states.size() > 0) {
+					relativeArmPosition temp_move_data = arm_states.getLast();
+					if (grip != temp_move_data.grip_pos) {
+						arm_states.add(new relativeArmPosition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, grip, num_saves));
+						did_save = true;
+					}
+				} else if (grip > 0) {
+					arm_states.add(new relativeArmPosition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, grip, num_saves));
+					did_save = true;
+				}
+			}
+			
+			if (did_save) {
+				Toast.makeText(getApplicationContext(), "ARM position recorded", Toast.LENGTH_SHORT).show();
+				if (doSound) {
+					if (mp != null) {
+						mp.release();
+					}
+					mp = MediaPlayer.create(getApplicationContext(),
+							R.raw.arm_position_recorded);
+					mp.start();
+				}
+			} else {
+				Toast.makeText(getApplicationContext(), "No data to save", Toast.LENGTH_SHORT).show();
+			}
+			
+			// zero tracker
+			for (int i = 0; i < 5; i++) {
+				armMovementTracker[i] = 0.0f;
+			}
+		} else {
+			Toast.makeText(getApplicationContext(), "Cannot save position when ARM not connected", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	public void trashState(View v) {
+		if (arm_states.size() > 0) {
+			DialogInterface.OnClickListener listener_2 = new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					if (which == Dialog.BUTTON_POSITIVE) {
+						
+						arm_states.clear();
+						num_saves = 0;
+						
+						if (doSound) {
+							if (mp != null) {
+								mp.release();
+							}
+							mp = MediaPlayer.create(getApplicationContext(),
+									R.raw.all_deleted);
+							mp.start();
+						}
+						Toast.makeText(getApplicationContext(), "All saved positions deleted", Toast.LENGTH_SHORT).show();
+						
+					} else if (which == Dialog.BUTTON_NEUTRAL) {
+						relativeArmPosition temp_move_data = arm_states.getLast(); 
+						int save_id = temp_move_data.save_count;
+						armMovementTracker[0] += temp_move_data.x_pos;
+						armMovementTracker[1] += temp_move_data.y_pos;
+						armMovementTracker[2] += temp_move_data.z_pos;
+						armMovementTracker[3] += temp_move_data.roll_pos;
+						armMovementTracker[4] += temp_move_data.pitch_pos;
+						
+						arm_states.removeLast();
+						
+						if (arm_states.size() > 0) {
+							temp_move_data = arm_states.getLast();
+							if (temp_move_data.save_count == save_id) {
+								armMovementTracker[0] += temp_move_data.x_pos;
+								armMovementTracker[1] += temp_move_data.y_pos;
+								armMovementTracker[2] += temp_move_data.z_pos;
+								armMovementTracker[3] += temp_move_data.roll_pos;
+								armMovementTracker[4] += temp_move_data.pitch_pos;
+								
+								arm_states.removeLast();
+							}
+						}
+						
+						num_saves--;
+						
+						if (doSound) {
+							if (mp != null) {
+								mp.release();
+							}
+							mp = MediaPlayer.create(getApplicationContext(),
+									R.raw.prev_deleted);
+							mp.start();
+						}
+						Toast.makeText(getApplicationContext(), "Previous saved position deleted", Toast.LENGTH_SHORT).show();
+					}
+				}
+			};
+	
+			new AlertDialog.Builder(v.getContext())
+					.setMessage(R.string.trash_dialog_message)
+					.setPositiveButton(R.string.delete_all, listener_2)
+					.setNeutralButton(R.string.delete_one, listener_2)
+					.setNegativeButton(R.string.cancel, listener_2)
+					.setTitle(R.string.trash_dialog_title).show();
+			
+		} else {
+			Toast.makeText(getApplicationContext(), "No positions to delete", Toast.LENGTH_SHORT).show();
+		}
+
 	}
 
 	/** Called when the user clicks the Lock Axis button */
@@ -781,6 +918,13 @@ class doSendTimerTask extends TimerTask {
 						+ "; y = " + MainActivity.displacement[1] + "; z = "
 						+ MainActivity.displacement[2]);
 			}
+			
+			// add to accumulation of arm movements
+			for (int i = 0; i < 3; i++) {
+				MainActivity.armMovementTracker[i] +=  MainActivity.displacement[i];
+			}
+			MainActivity.armMovementTracker[3] +=  MainActivity.rollAngle;
+			MainActivity.armMovementTracker[4] +=  MainActivity.pitchAngle;
 
 			MainActivity.displacement[0] = 0.0f;
 			MainActivity.displacement[1] = 0.0f;
@@ -819,5 +963,25 @@ class doSendTimerTask extends TimerTask {
 		} else {
 			MainActivity.grip = MainActivity.gripperBar.getProgress(); // reset Home or Disconnect signals if not connected
 		}
+	}
+}
+
+class relativeArmPosition {
+	public float x_pos;
+	public float y_pos;
+	public float z_pos;
+	public float roll_pos;
+	public float pitch_pos;
+	public float grip_pos;
+	public int save_count;
+
+	public relativeArmPosition(float x, float y, float z, float roll, float pitch, float grip, int saveNumber) {
+		x_pos = x;
+		y_pos = y;
+		z_pos = z;
+		roll_pos = roll;
+		pitch_pos = pitch;
+		grip_pos = grip;
+		save_count = saveNumber;
 	}
 }

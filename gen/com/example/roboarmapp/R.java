@@ -77,14 +77,18 @@ public final class R {
         public static final int activity_settings=0x7f070002;
     }
     public static final class raw {
-        public static final int arm_connected=0x7f040000;
-        public static final int arm_disconnected=0x7f040001;
-        public static final int arm_mode=0x7f040002;
-        public static final int connecting=0x7f040003;
-        public static final int connection_failed=0x7f040004;
-        public static final int home=0x7f040005;
-        public static final int robot_blip=0x7f040006;
-        public static final int wrist_mode=0x7f040007;
+        public static final int all_deleted=0x7f040000;
+        public static final int arm_connected=0x7f040001;
+        public static final int arm_disconnected=0x7f040002;
+        public static final int arm_mode=0x7f040003;
+        public static final int arm_position_recorded=0x7f040004;
+        public static final int arm_state_recorded=0x7f040005;
+        public static final int connecting=0x7f040006;
+        public static final int connection_failed=0x7f040007;
+        public static final int home=0x7f040008;
+        public static final int prev_deleted=0x7f040009;
+        public static final int robot_blip=0x7f04000a;
+        public static final int wrist_mode=0x7f04000b;
     }
     public static final class string {
         public static final int app_name=0x7f050000;
@@ -92,6 +96,8 @@ public final class R {
         public static final int close_gripper=0x7f050013;
         public static final int connect_error=0x7f050006;
         public static final int connecting=0x7f050005;
+        public static final int delete_all=0x7f05001f;
+        public static final int delete_one=0x7f05001e;
         public static final int done_button=0x7f050014;
         public static final int gripper_control=0x7f050011;
         public static final int home_dialog_message=0x7f050007;
@@ -104,12 +110,11 @@ public final class R {
         public static final int menu_settings=0x7f050001;
         public static final int no_ip=0x7f050004;
         public static final int open_gripper=0x7f050012;
-        public static final int playback=0x7f05001e;
+        public static final int playback=0x7f05001d;
         public static final int proceed=0x7f050009;
         public static final int release_to_stop=0x7f050003;
         public static final int setting_IP=0x7f050016;
-        public static final int setting_LED=0x7f05001c;
-        public static final int setting_accelHZ=0x7f05001d;
+        public static final int setting_accelHZ=0x7f05001c;
         public static final int setting_port=0x7f050017;
         public static final int setting_send_rate=0x7f050018;
         public static final int setting_sensitivity=0x7f050019;
@@ -118,6 +123,8 @@ public final class R {
         public static final int start_stop=0x7f050002;
         public static final int title_activity_lock_axis=0x7f05000b;
         public static final int title_activity_settings=0x7f050015;
+        public static final int trash_dialog_message=0x7f050021;
+        public static final int trash_dialog_title=0x7f050020;
     }
     public static final class style {
         /** 

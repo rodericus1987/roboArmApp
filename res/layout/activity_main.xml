@@ -105,6 +105,7 @@
         android:layout_height="50dp"
         android:layout_alignLeft="@+id/playback_text"
         android:layout_below="@+id/playback_text"
+        android:onClick="recordState"
         android:src="@drawable/record" />
 
     <ImageView
@@ -122,7 +123,8 @@
         android:layout_height="52dp"
         android:layout_alignRight="@+id/playback_text"
         android:layout_alignTop="@+id/record"
-        android:layout_marginRight="2dp"
+        android:layout_marginRight="3dp"
+        android:onClick="trashState"
         android:src="@drawable/trash" />
 
 </RelativeLayout>
