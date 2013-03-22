@@ -31,5 +31,6 @@
     <string name="setting_sound">Enable sounds</string>
     <string name="setting_LED">Enable LED when A.R.M active</string>
     <string name="setting_accelHZ">Sensor sampling rate</string>
+    <string name="playback"><b><u>Playback Control</u></b></string>
 
 </resources>
