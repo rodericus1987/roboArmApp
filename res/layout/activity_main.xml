@@ -66,6 +66,7 @@
         android:layout_alignLeft="@+id/startStopButton"
         android:layout_alignParentTop="true"
         android:layout_marginTop="16dp"
+        android:layout_marginLeft="10dp"
         android:background="@drawable/lock_axis_button"
         android:onClick="lockAxis" />
 

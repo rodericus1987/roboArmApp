@@ -192,6 +192,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		
 		// check for offset file
 		fileTest = getFileStreamPath("offsets.txt");
+		offset = new float [3];
 		if (fileTest.exists()) {
 			String entryDelims = "[|]";
 			FileInputStream in;
@@ -203,7 +204,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 				String rawInput = bufferedReader.readLine();
 				in.close();
 				String[] entries = rawInput.split(entryDelims);
-				offset = new float [3];
 				offset[0] = Float.parseFloat(entries[0]);
 				offset[1] = Float.parseFloat(entries[1]);
 				offset[2] = Float.parseFloat(entries[2]);
@@ -213,6 +213,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+		} else {
+			for (int i = 0; i < 3; i++) {
+				offset[i] = 0.0f;
 			}
 		}
 
@@ -356,7 +360,20 @@ public class MainActivity extends Activity implements SensorEventListener {
 				public void onClick(DialogInterface dialog, int which) {
 					if (which == Dialog.BUTTON_POSITIVE) {
 						
-						arm_states.clear();
+						relativeArmPosition temp_move_data;
+						
+						// reconstruct current position
+						for (int i = 0; i < arm_states.size(); i++) {
+							temp_move_data = arm_states.getLast();
+							armMovementTracker[0] += temp_move_data.x_pos;
+							armMovementTracker[1] += temp_move_data.y_pos;
+							armMovementTracker[2] += temp_move_data.z_pos;
+							armMovementTracker[3] += temp_move_data.roll_pos;
+							armMovementTracker[4] += temp_move_data.pitch_pos;
+							arm_states.removeLast();
+						}
+						
+						//arm_states.clear();
 						num_saves = 0;
 						
 						if (doSound) {
@@ -464,7 +481,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 					@Override
 					public boolean onMenuItemClick(MenuItem item) {
-						grip = 200; // disconnect signal
+						disconnectFromServer();
 						return false;
 					}
 
@@ -843,6 +860,23 @@ public class MainActivity extends Activity implements SensorEventListener {
 		lockButton.setEnabled(true);
 		if (socketConnected) {
 			socketConnected = false;
+			
+			// send disconnect signal
+			float[] outFloatData = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 200.0f };
+			for (int i = 0; i < outFloatData.length; i++) {
+				int data = Float.floatToRawIntBits(outFloatData[i]);
+				byte outByteData[] = new byte[4];
+				outByteData[3] = (byte) (data >> 24);
+				outByteData[2] = (byte) (data >> 16);
+				outByteData[1] = (byte) (data >> 8);
+				outByteData[0] = (byte) (data);
+				try {
+					MainActivity.out.write(outByteData);
+				} catch (IOException e) {
+					MainActivity.disconnectFromServer();
+				}
+			}
+			
 			try {
 				out.flush();
 				out.close();
@@ -934,11 +968,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 class doSendTimerTask extends TimerTask {
 	public void run() {
 		if (MainActivity.socketConnected) {
-			boolean disconnectCase = false;
 			boolean homeCase = false;
-			if (MainActivity.grip == 200) {
-				disconnectCase = true;
-			} else if (MainActivity.grip == -300) {
+			if (MainActivity.grip == -300) {
 				homeCase = true;
 			}
 			// Log.d("x displacement", "" + MainActivity.displacement[0]);
@@ -989,10 +1020,6 @@ class doSendTimerTask extends TimerTask {
 			}
 			try {
 				MainActivity.out.flush();
-				if (disconnectCase) { // disconnect case
-					MainActivity.disconnectFromServer();
-					MainActivity.grip = MainActivity.gripperBar.getProgress();
-				}
 				if (homeCase) { // home case
 					MainActivity.grip = MainActivity.gripperBar.getProgress();
 				}
