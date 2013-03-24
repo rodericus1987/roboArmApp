@@ -116,6 +116,7 @@
         android:layout_alignTop="@+id/playback_text"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="12dp"
+        android:onClick="playbackStates"
         android:src="@drawable/play_button" />
 
     <ImageView

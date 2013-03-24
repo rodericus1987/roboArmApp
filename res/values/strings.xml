@@ -35,6 +35,10 @@
     <string name="delete_all">Delete <b>ALL</b></string>
     <string name="trash_dialog_title">Delete saved positions</string>
     <string name="trash_dialog_message">Delete previously saved ARM positions</string>
+    <string name="playback_dialog_title">Saved position playback</string>
+    <string name="playback_dialog_message">Begin playback?\n<b>WARNING:</b> ARM will be homed!</string>
+    <string name="begin_playback">Start</string>
+    <string name="playback_text">Playback Mode\n\n\nTap to cancel</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_calibration">Calibration</string>
     <string name="calibration_step1">1. Put the device rested on a level surface</string>

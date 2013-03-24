@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -32,6 +33,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.sax.RootElement;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -96,6 +98,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	
 	public static float[] armMovementTracker;
 	public static int num_saves;
+	public static boolean doPlayback;
+	public static boolean playbackMoveDone;
 
 	// Sensors
 	private SensorManager mSensorManager;
@@ -129,6 +133,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 			armMovementTracker[i] = 0.0f;
 		}
 		num_saves = 0;
+		doPlayback = false;
+		playbackMoveDone = true;
 
 		armMode = true;
 
@@ -261,7 +267,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			@Override
 			public void onProgressChanged(SeekBar arg0, int progress,
 					boolean arg2) {
-				if ((grip <= 100) && (grip >= 0)) {
+				if ((grip <= 100) && (grip >= 0) && (!doPlayback)) {
 					grip = (float) progress;
 				}
 			}
@@ -300,6 +306,39 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private void resetMainButton() {
 		myMainButton.setBackgroundColor(Color.GREEN);
 		myMainButton.setText(R.string.start_stop);
+	}
+	
+	public void playbackStates(View v) {
+		if (!socketConnected) {
+			Toast.makeText(getApplicationContext(), "Cannot playback when ARM not connected", Toast.LENGTH_SHORT).show();
+		} else if (arm_states.size() > 0) {
+			DialogInterface.OnClickListener listener_3 = new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					if (which == Dialog.BUTTON_POSITIVE) {
+						if (doSound) {
+							if (mp != null) {
+								mp.release();
+							}
+							mp = MediaPlayer.create(getApplicationContext(),
+									R.raw.playback_start);
+							mp.start();
+						}
+						doPlayback = true;						
+						new playbackMode().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					}
+				}
+			};
+	
+			new AlertDialog.Builder(v.getContext())
+					.setMessage(R.string.playback_dialog_message)
+					.setPositiveButton(R.string.begin_playback, listener_3)
+					.setNegativeButton(R.string.cancel, listener_3)
+					.setTitle(R.string.playback_dialog_title).show();
+			
+		} else {
+			Toast.makeText(getApplicationContext(), "No positions for playback", Toast.LENGTH_SHORT).show();
+		}
 	}
 	
 	public void recordState(View v) {
@@ -585,6 +624,89 @@ public class MainActivity extends Activity implements SensorEventListener {
 		disconnectFromServer();
 		super.onDestroy();
 	}
+	
+	public class playbackMode extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			relativeArmPosition temp_arm_state;
+			Iterator<relativeArmPosition> stateIterator = arm_states.iterator();
+			while ((socketConnected) && (doPlayback)) {
+				
+				// temp for testing
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				while (!playbackMoveDone) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				if (stateIterator.hasNext()) {
+					temp_arm_state = stateIterator.next();
+					displacement[0] = temp_arm_state.x_pos;
+					displacement[1] = temp_arm_state.y_pos;
+					displacement[2] = temp_arm_state.z_pos;
+					rollAngle = temp_arm_state.roll_pos;
+					pitchAngle = temp_arm_state.pitch_pos;
+					grip = temp_arm_state.grip_pos;
+				} else {
+					doPlayback = false;
+				}
+				
+				//playbackMoveDone = false;
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			grip = -300; // home arm first
+			//playbackMoveDone = false;
+			myMainButton.setBackgroundColor(Color.RED);
+			myMainButton.setText(R.string.playback_text);
+			myMainButton.setOnTouchListener(new OnTouchListener() {
+				public boolean onTouch(View v, MotionEvent event) {
+
+					switch (event.getAction()) {
+					case MotionEvent.ACTION_DOWN: {
+						doPlayback = false;
+						myMainButton.setText("Canceling...");
+						myMainButton.setOnClickListener(null);
+						return true;
+					}
+					default:
+						return false;
+					}
+				}
+			});
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			Toast.makeText(getApplicationContext(), "Playback complete", Toast.LENGTH_SHORT).show();
+			if (doSound) {
+				if (mp != null) {
+					mp.release();
+				}
+				mp = MediaPlayer.create(getApplicationContext(),
+						R.raw.playback_complete);
+				mp.start();
+			}
+			setMainButton_mainMode();
+			doPlayback = false;
+			grip = gripperBar.getProgress();
+		}
+		
+	}
 
 	public class readFromServer extends AsyncTask<Void, Void, Void> {
 		@Override
@@ -594,6 +716,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					int inVal = in.read();
 					if (inVal != -1) {
 						v1.vibrate(500);
+						playbackMoveDone = true;
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -686,70 +809,73 @@ public class MainActivity extends Activity implements SensorEventListener {
 				}
 				gripperBar.setEnabled(true);
 				reconnectButtonSet = false;
-				myMainButton.setBackgroundColor(Color.GREEN);
-				myMainButton.setText(R.string.start_stop);
-
-				myMainButton = (Button) findViewById(R.id.startStopButton);
-				myMainButton.setOnTouchListener(new OnTouchListener() {
-					public boolean onTouch(View v, MotionEvent event) {
-
-						switch (event.getAction()) {
-						case MotionEvent.ACTION_DOWN: {
-
-							// beep
-							if (doSound) {
-								if (mp != null) {
-									mp.release();
-								}
-								mp = MediaPlayer.create(
-										getApplicationContext(),
-										R.raw.robot_blip);
-								mp.start();
-
-							}
-
-							// Vibrate for 50 milliseconds
-							if (doVibrate) {
-								v1.vibrate(50);
-							}
-
-							gripperBar.setEnabled(false);
-							homeButton.setEnabled(false);
-							lockButton.setEnabled(false);
-							setOnMainButton();
-							
-							tracking = true;
-							rotationVector = new float[3];
-							acceleration = new float[4];
-							lastMeasurement1 = System.nanoTime();
-							lastMeasurement2 = System.nanoTime();
-							speed[0] = 0;
-							speed[1] = 0;
-							speed[2] = 0;
-
-							return true;
-						}
-
-						case MotionEvent.ACTION_UP: {
-
-							gripperBar.setEnabled(true);
-							homeButton.setEnabled(true);
-							lockButton.setEnabled(true);
-							resetMainButton();
-							v1.cancel();
-							tracking = false;
-
-							return true;
-						}
-
-						default:
-							return false;
-						}
-					}
-				});
+				setMainButton_mainMode();
 			}
 			connecting = false;
 		}
+	}
+	
+	public void setMainButton_mainMode() {
+		myMainButton.setBackgroundColor(Color.GREEN);
+		myMainButton.setText(R.string.start_stop);
+
+		myMainButton.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_DOWN: {
+
+					// beep
+					if (doSound) {
+						if (mp != null) {
+							mp.release();
+						}
+						mp = MediaPlayer.create(
+								getApplicationContext(),
+								R.raw.robot_blip);
+						mp.start();
+
+					}
+
+					// Vibrate for 50 milliseconds
+					if (doVibrate) {
+						v1.vibrate(50);
+					}
+
+					gripperBar.setEnabled(false);
+					homeButton.setEnabled(false);
+					lockButton.setEnabled(false);
+					setOnMainButton();
+
+					tracking = true;
+					rotationVector = new float[3];
+					acceleration = new float[4];
+					lastMeasurement1 = System.nanoTime();
+					lastMeasurement2 = System.nanoTime();
+					speed[0] = 0;
+					speed[1] = 0;
+					speed[2] = 0;
+
+					return true;
+				}
+
+				case MotionEvent.ACTION_UP: {
+
+					gripperBar.setEnabled(true);
+					homeButton.setEnabled(true);
+					lockButton.setEnabled(true);
+					resetMainButton();
+					v1.cancel();
+					tracking = false;
+
+					return true;
+				}
+
+				default:
+					return false;
+				}
+			}
+		});
 	}
 
 	@Override
@@ -968,9 +1094,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 class doSendTimerTask extends TimerTask {
 	public void run() {
 		if (MainActivity.socketConnected) {
-			boolean homeCase = false;
-			if (MainActivity.grip == -300) {
-				homeCase = true;
+			boolean gripSignalMode = false;
+			if ((MainActivity.grip > 100) || (MainActivity.grip < 0)) {
+				gripSignalMode = true;
 			}
 			// Log.d("x displacement", "" + MainActivity.displacement[0]);
 			for (int i = 0; i < 3; i++) {
@@ -1020,7 +1146,7 @@ class doSendTimerTask extends TimerTask {
 			}
 			try {
 				MainActivity.out.flush();
-				if (homeCase) { // home case
+				if ((gripSignalMode) && (!MainActivity.doPlayback)) {
 					MainActivity.grip = MainActivity.gripperBar.getProgress();
 				}
 			} catch (IOException e) {
