@@ -49,5 +49,8 @@
     </string-array>
     <string name="button_calibration">Start Calibration</string>
     <string name="current_offset">Current Offset</string>
+    <string name="save">Save</string>
+    <string name="save_offset_message">Do you wish to keep the results of this calibration?</string>
+    <string name="save_offset_title">Save New offsets</string>
 
 </resources>

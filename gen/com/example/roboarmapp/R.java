@@ -133,6 +133,9 @@ public final class R {
         public static final int playback=0x7f05001d;
         public static final int proceed=0x7f050009;
         public static final int release_to_stop=0x7f050003;
+        public static final int save=0x7f05002a;
+        public static final int save_offset_message=0x7f05002b;
+        public static final int save_offset_title=0x7f05002c;
         public static final int setting_IP=0x7f050016;
         public static final int setting_accelHZ=0x7f05001c;
         public static final int setting_port=0x7f050017;

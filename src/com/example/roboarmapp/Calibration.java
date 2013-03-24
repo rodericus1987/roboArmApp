@@ -6,12 +6,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -106,10 +110,10 @@ public class Calibration extends Activity implements SensorEventListener {
 		@Override
 		protected Void doInBackground(Void... arg0) {
 			while (true) {
-				if (Calibration.counter >= 1000) {
+				if (Calibration.counter >= 100) {
 					break;
 				} else {
-					pDialog.setProgress(counter/10);
+					pDialog.setProgress(counter);
 				}
 			}
 			return null;
@@ -119,7 +123,7 @@ public class Calibration extends Activity implements SensorEventListener {
 		protected void onPreExecute() {
 			startSensors();
 			pDialog = new ProgressDialog(context);
-			pDialog.setCancelable(true);
+			//pDialog.setCancelable(true);
 			pDialog.setTitle("Calibration in Process");
 			pDialog.setMessage("Calibrating... Please Wait.");
 			pDialog.show();
@@ -129,28 +133,42 @@ public class Calibration extends Activity implements SensorEventListener {
 		protected void onPostExecute(Void result) {
 			pDialog.dismiss();
 			stopSensors();
-			TextView display_offset = (TextView) findViewById(R.id.textView6);
-			display_offset.setText("x = " + offset[0] + "; y = " + offset[1]
-					+ "; z = " + offset[2]);
-			File fileTest = getFileStreamPath("offsets.txt");
-			if (fileTest.exists()) {
-				fileTest.delete();
-			}
-			try {
-				FileOutputStream out = openFileOutput("offsets.txt",
-						Context.MODE_PRIVATE);
-				String entry = "" + offset[0] + "|" + offset[1] + "|"
-						+ offset[2];
-				out.write(entry.getBytes());
-				out.getFD().sync();
-				out.close();
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+			DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					if (which == Dialog.BUTTON_POSITIVE) {
+						TextView display_offset = (TextView) findViewById(R.id.textView6);
+						display_offset.setText("x = " + offset[0] + "; y = " + offset[1]
+								+ "; z = " + offset[2]);
+						File fileTest = getFileStreamPath("offsets.txt");
+						if (fileTest.exists()) {
+							fileTest.delete();
+						}
+						try {
+							FileOutputStream out = openFileOutput("offsets.txt",
+									Context.MODE_PRIVATE);
+							String entry = "" + offset[0] + "|" + offset[1] + "|"
+									+ offset[2];
+							out.write(entry.getBytes());
+							out.getFD().sync();
+							out.close();
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			};
+
+			new AlertDialog.Builder(context)
+					.setMessage(R.string.save_offset_message)
+					.setPositiveButton(R.string.save, listener)
+					.setNegativeButton(R.string.cancel, listener)
+					.setTitle(R.string.save_offset_title).show();
 		}
 	}
 }
