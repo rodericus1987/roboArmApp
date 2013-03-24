@@ -7,9 +7,9 @@
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="17" />
-    
+
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -38,7 +38,15 @@
         <activity
             android:name="com.example.roboarmapp.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:windowSoftInputMode="stateHidden"
+            android:parentActivityName="com.example.roboarmapp.MainActivity"
+            android:windowSoftInputMode="stateHidden" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.roboarmapp.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.example.roboarmapp.Calibration"
+            android:label="@string/title_activity_calibration"
             android:parentActivityName="com.example.roboarmapp.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -69,6 +69,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static Timer myTimer;
 	public static boolean doVibrate = true;
 	public static boolean doSound = true;
+	public Context context = this;
 	
 	private static LinkedList<relativeArmPosition> arm_states;
 
@@ -107,6 +108,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static float[] previous_speed;
 	public static float[] speed;
 	public static float[] displacement;
+	public static float[] offset;
 	public static float rollAngle = 0;
 	public static float pitchAngle = 0;
 	public static float grip = 0.0f;
@@ -179,6 +181,32 @@ public class MainActivity extends Activity implements SensorEventListener {
 					doSound = false;
 				}
 				sensitivity = Integer.parseInt(entries[5]);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		// check for offset file
+		fileTest = getFileStreamPath("offsets.txt");
+		if (fileTest.exists()) {
+			String entryDelims = "[|]";
+			FileInputStream in;
+			try {
+				in = openFileInput("offsets.txt");
+				InputStreamReader inputStreamReader = new InputStreamReader(in);
+				BufferedReader bufferedReader = new BufferedReader(
+						inputStreamReader);
+				String rawInput = bufferedReader.readLine();
+				in.close();
+				String[] entries = rawInput.split(entryDelims);
+				offset = new float [3];
+				offset[0] = Float.parseFloat(entries[0]);
+				offset[1] = Float.parseFloat(entries[1]);
+				offset[2] = Float.parseFloat(entries[2]);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -440,6 +468,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 						return false;
 					}
 
+				});
+		menu.add("Calibrate").setOnMenuItemClickListener(
+				new OnMenuItemClickListener() {
+					
+					public boolean onMenuItemClick(MenuItem item) {
+						Intent intent = new Intent(context, Calibration.class);
+						startActivity(intent);
+						
+						return true;
+					}
 				});
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_main, menu);
@@ -739,6 +777,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			float[] rawLinear = { event.values[0], event.values[1],
 					event.values[2], 0 };
 			for (int i = 0; i < 3; i++) {
+				rawLinear[i] = rawLinear[i] - offset[i];
 				if (rawLinear[i] < 0.2 && rawLinear[i] > -0.2) {
 					rawLinear[i] = 0;
 				}

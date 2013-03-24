@@ -35,5 +35,19 @@
     <string name="delete_all">Delete <b>ALL</b></string>
     <string name="trash_dialog_title">Delete saved positions</string>
     <string name="trash_dialog_message">Delete previously saved ARM positions</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_calibration">Calibration</string>
+    <string name="calibration_step1">1. Put the device rested on a level surface</string>
+    <string name="calibration_step2">2. Press &quot;Start Calibration&quot; button</string>
+    <string name="calibration_step3">3. Wait till the progress bar is finished</string>
+    <string name="calibration_step4">4. Choose to save or discard the offset values</string>
+    <string-array name="calibration_steps">
+        <item >1. Put the device rested on a level surface</item>
+        <item >2. Press &quot;Start Calibration&quot; button</item>
+        <item >3. Wait till the progress bar is finished</item>
+        <item >4. Choose to save or discard the offset values</item>
+    </string-array>
+    <string name="button_calibration">Start Calibration</string>
+    <string name="current_offset">Current Offset</string>
 
 </resources>
