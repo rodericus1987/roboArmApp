@@ -96,6 +96,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	public static boolean armMode;
 	
+	public static String lock = "lock";
+	
 	public static float[] armMovementTracker;
 	public static int num_saves;
 	public static boolean doPlayback;
@@ -110,6 +112,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static float[] rotationMatrix;
 	public static float[] acceleration;
 	public static float[] previous_speed;
+	public static float[] previous_acceleration;
 	public static float[] speed;
 	public static float[] displacement;
 	public static float[] offset;
@@ -117,6 +120,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static float pitchAngle = 0;
 	public static float grip = 0.0f;
 	public static int sensitivity = 0;
+	
+	public static long[] sensorRestartTime;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -146,17 +151,24 @@ public class MainActivity extends Activity implements SensorEventListener {
 		pitchLocked = true;
 
 		modeSwitch = (Switch) findViewById(R.id.main_switch);
+		
+		sensorRestartTime = new long[3];
+		for (int i = 0; i < 3; i++) {
+			sensorRestartTime[i] = 0;
+		}
 
 		displacement = new float[3];
 		for (int i = 0; i < 3; i++) {
 			displacement[i] = 0.0f;
 		}
 
+		previous_acceleration = new float[3];
 		speed = new float[3];
 		previous_speed = new float[3];
 		for (int i = 0; i < 3; i++) {
 			speed[i] = 0.0f;
 			previous_speed[i] = 0.0f;
+			previous_acceleration[i] = 0.0f;
 		}
 
 		v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -241,13 +253,20 @@ public class MainActivity extends Activity implements SensorEventListener {
 										R.raw.home);
 								mp.start();
 							}
-							rollAngle = 0;
-							pitchAngle = 0;
-							displacement[0] = 0.0f;
-							displacement[1] = 0.0f;
-							displacement[2] = 0.0f;
+							synchronized (lock) {
+								rollAngle = 0;
+								pitchAngle = 0;
+								displacement[0] = 0.0f;
+								displacement[1] = 0.0f;
+								displacement[2] = 0.0f;
+							}
 							grip = -300; // home signal
 							gripperBar.setProgress(0);
+							
+							// zero tracker
+							for (int i = 0; i < 5; i++) {
+								armMovementTracker[i] = 0.0f;
+							}
 						}
 					}
 				};
@@ -295,7 +314,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		};
 		handler.post(r);
 
-		new readFromServer().execute();
+		new readFromServer().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	private void setOnMainButton() {
@@ -325,7 +344,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 							mp.start();
 						}
 						doPlayback = true;						
-						new playbackMode().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						new playbackMode().execute();
 					}
 				}
 			};
@@ -490,15 +509,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 			mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 			mAccelerometer = mSensorManager
 					.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-			mOrientation = mSensorManager
-					.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+			//mOrientation = mSensorManager
+			//		.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 			mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 			mRotation = mSensorManager
 					.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 			mSensorManager.registerListener(this, mAccelerometer,
 					SensorManager.SENSOR_DELAY_NORMAL);
-			mSensorManager.registerListener(this, mOrientation,
-					SensorManager.SENSOR_DELAY_NORMAL);
+			//mSensorManager.registerListener(this, mOrientation,
+			//		SensorManager.SENSOR_DELAY_NORMAL);
 			mSensorManager.registerListener(this, mGyroscope,
 					SensorManager.SENSOR_DELAY_NORMAL);
 			mSensorManager.registerListener(this, mRotation,
@@ -652,11 +671,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 				
 				if (stateIterator.hasNext()) {
 					temp_arm_state = stateIterator.next();
-					displacement[0] = temp_arm_state.x_pos;
-					displacement[1] = temp_arm_state.y_pos;
-					displacement[2] = temp_arm_state.z_pos;
-					rollAngle = temp_arm_state.roll_pos;
-					pitchAngle = temp_arm_state.pitch_pos;
+					synchronized (lock) {
+						displacement[0] = temp_arm_state.x_pos;
+						displacement[1] = temp_arm_state.y_pos;
+						displacement[2] = temp_arm_state.z_pos;
+						rollAngle = temp_arm_state.roll_pos;
+						pitchAngle = temp_arm_state.pitch_pos;
+					}
 					grip = temp_arm_state.grip_pos;
 				} else {
 					doPlayback = false;
@@ -735,7 +756,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			new readFromServer().execute();
+			new readFromServer().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	}
 
@@ -852,9 +873,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 					acceleration = new float[4];
 					lastMeasurement1 = System.nanoTime();
 					lastMeasurement2 = System.nanoTime();
-					speed[0] = 0;
-					speed[1] = 0;
-					speed[2] = 0;
+					
+					synchronized (lock) {
+						for (int i = 0; i < 3; i++) {
+							speed[i] = 0;
+							previous_speed[i] = 0.0f;
+							previous_acceleration[i] = 0.0f;
+						}
+					}
 
 					return true;
 				}
@@ -886,27 +912,30 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		if (event.sensor.equals(mGyroscope) && tracking) {
-			float roll = event.values[1]; // around axis y
-			float pitch = event.values[0]; // around axis x
-			if (roll < 0.005 && roll > -0.005) {
-				roll = 0;
-			}
-			if (pitch < 0.005 & pitch > -0.005) {
-				pitch = 0;
-			}
+		if (event.sensor.equals(mGyroscope)) {
 			long timeInterval = event.timestamp - lastMeasurement2;
 			lastMeasurement2 = event.timestamp;
-			// Assume the device has been turning with same speed for the whole
-			// interval
-			if (!rollLocked) {
-				roll = (float) (roll * timeInterval * NS2S);
-				rollAngle = rollAngle + roll;
-			}
-
-			if (!pitchLocked) {
-				pitch = (float) (pitch * timeInterval * NS2S);
-				pitchAngle = pitchAngle + pitch;
+			
+			if (tracking) {
+				float roll = event.values[1]; // around axis y
+				float pitch = event.values[0]; // around axis x
+				if (roll < 0.005 && roll > -0.005) {
+					roll = 0;
+				}
+				if (pitch < 0.005 & pitch > -0.005) {
+					pitch = 0;
+				}
+				// Assume the device has been turning with same speed for the whole
+				// interval
+				if (!rollLocked) {
+					roll = (float) (roll * timeInterval * NS2S);
+					rollAngle = rollAngle + roll;
+				}
+	
+				if (!pitchLocked) {
+					pitch = (float) (pitch * timeInterval * NS2S);
+					pitchAngle = pitchAngle + pitch;
+				}
 			}
 
 			// Log.d("CHECK: ", "The current roll value is " + rollAngle * 360 /
@@ -916,67 +945,79 @@ public class MainActivity extends Activity implements SensorEventListener {
 			// doSend(outFloatData);
 		}
 
-		if (event.sensor.equals(mAccelerometer) && tracking) {
-			float[] rawLinear = { event.values[0], event.values[1],
-					event.values[2], 0 };
-			for (int i = 0; i < 3; i++) {
-				rawLinear[i] = rawLinear[i] - offset[i];
-				if (rawLinear[i] < 0.2 && rawLinear[i] > -0.2) {
-					rawLinear[i] = 0;
-				}
-			}
-			float[] temp = new float[16];
-			rotationMatrix = new float[16];
-			SensorManager.getRotationMatrixFromVector(temp, rotationVector);
-			Matrix.invertM(rotationMatrix, 0, temp, 0);
-			Matrix.multiplyMV(acceleration, 0, rotationMatrix, 0, rawLinear, 0);
-			// Log.d("CHECK:", "x = " + acceleration[0] + "; y = " +
-			// acceleration[1] + "; z = " + acceleration[2]);
+		if (event.sensor.equals(mAccelerometer)) {
+			
 			long timeInterval = event.timestamp - lastMeasurement1;
 			lastMeasurement1 = event.timestamp;
-
-			if (!xAxisLocked) {
-				speed[0] = (float) (acceleration[0] * timeInterval * NS2S)
-						+ speed[0];
-				if (speed[0] > 0 && previous_speed[0] < 0) {
-					speed[0] = 0;
-				} else if (speed[0] < 0 && previous_speed[0] > 0) {
-					speed[0] = 0;
+			
+			if (tracking) {
+				float[] rawLinear = { event.values[0], event.values[1],
+						event.values[2], 0 };
+				for (int i = 0; i < 3; i++) {
+					rawLinear[i] = rawLinear[i] - offset[i];
+					/*if (rawLinear[i] < 0.2 && rawLinear[i] > -0.2) {
+						rawLinear[i] = 0;
+					}*/
 				}
-				displacement[0] = (float) (speed[0] * timeInterval * NS2S)
-						+ displacement[0];
-			}
-
-			if (!yAxisLocked) {
-				speed[1] = (float) (acceleration[1] * timeInterval * NS2S)
-						+ speed[1];
-				if (speed[1] > 0 && previous_speed[1] < 0) {
-					speed[1] = 0;
-				} else if (speed[1] < 0 && previous_speed[1] > 0) {
-					speed[1] = 0;
+				float[] temp = new float[16];
+				rotationMatrix = new float[16];
+				SensorManager.getRotationMatrixFromVector(temp, rotationVector);
+				Matrix.invertM(rotationMatrix, 0, temp, 0);
+				Matrix.multiplyMV(acceleration, 0, rotationMatrix, 0, rawLinear, 0);
+				
+				synchronized (lock) {
+				
+					boolean zeroSpeed = false;
+					for (int i = 0; i < 3; i++) {
+						
+						if (acceleration[i] > 0 && previous_acceleration[i] < 0) {
+							zeroSpeed = true;
+							//speed[i] = 0;
+						} else if (acceleration[i] < 0 && previous_acceleration[i] > 0) {
+							zeroSpeed = true;
+							//speed[i] = 0;
+						}
+						
+						if (zeroSpeed) {
+							//acceleration[i] = 0.0f;
+							//speed[i] = 0.0f;
+							//sensorRestartTime[i] = event.timestamp + 10000000;
+						}
+						
+						previous_speed[i] = speed[i];
+						previous_acceleration[i] = acceleration[i];
+					}
+	
+					if ((!xAxisLocked) && (event.timestamp > sensorRestartTime[0])) {
+						speed[0] = (float) (((acceleration[0] + previous_acceleration[0]) / 2.0f) * timeInterval * NS2S)
+								+ speed[0];
+						displacement[0] = (float) (((speed[0] + previous_speed[0]) / 2.0f) * timeInterval * NS2S)
+								+ displacement[0];
+					}
+		
+					if ((!yAxisLocked) && (event.timestamp > sensorRestartTime[1])) {
+						speed[1] = (float) (((acceleration[1] + previous_acceleration[1]) / 2.0f) * timeInterval * NS2S)
+								+ speed[1];
+						displacement[1] = (float) (((speed[1] + previous_speed[1]) / 2.0f) * timeInterval * NS2S)
+								+ displacement[1];
+					}
+		
+					if ((!zAxisLocked) && (event.timestamp > sensorRestartTime[2])) {
+						speed[2] = (float) (((acceleration[2] + previous_acceleration[2]) / 2.0f) * timeInterval * NS2S)
+								+ speed[2];
+						displacement[2] = (float) (((speed[2] + previous_speed[2]) / 2.0f) * timeInterval * NS2S)
+								+ displacement[2];
+					}
 				}
-				displacement[1] = (float) (speed[1] * timeInterval * NS2S)
-						+ displacement[1];
 			}
-
-			if (!zAxisLocked) {
-				speed[2] = (float) (acceleration[2] * timeInterval * NS2S)
-						+ speed[2];
-				if (speed[2] > 0 && previous_speed[2] < 0) {
-					speed[2] = 0;
-				} else if (speed[2] < 0 && previous_speed[2] > 0) {
-					speed[2] = 0;
-				}
-				displacement[2] = (float) (speed[2] * timeInterval * NS2S)
-						+ displacement[2];
-			}
-			previous_speed = speed;
 			// Log.d("CHECK:", "x = " + displacement[0] + "; y = " +
 			// displacement[1] + "; z = " + displacement[2]);
 		}
 
 		if (event.sensor.equals(mRotation) && tracking) {
-			rotationVector = event.values;
+			for (int i = 0; i < 3; i++) {
+				rotationVector[i] = event.values[i];
+			}
 		}
 
 	}
@@ -1099,38 +1140,47 @@ class doSendTimerTask extends TimerTask {
 				gripSignalMode = true;
 			}
 			// Log.d("x displacement", "" + MainActivity.displacement[0]);
-			for (int i = 0; i < 3; i++) {
-				MainActivity.displacement[i] = MainActivity.displacement[i]
-						/ (1.0f + (float) (MainActivity.sensitivity / 25.0f));
-			}
-			float[] outFloatData = { MainActivity.rollAngle,
-					MainActivity.pitchAngle, MainActivity.displacement[0],
-					MainActivity.displacement[1], MainActivity.displacement[2],
-					MainActivity.grip };
-			if (MainActivity.displacement[0] != 0
-					|| MainActivity.displacement[1] != 0
-					|| MainActivity.displacement[2] != 0) {
-				Log.d("CHECK:", "x = " + MainActivity.displacement[0]
-						+ "; y = " + MainActivity.displacement[1] + "; z = "
-						+ MainActivity.displacement[2]);
+			
+			float[] outFloatData = new float[6];
+			synchronized (MainActivity.lock) {
+
+				for (int i = 0; i < 3; i++) {
+					MainActivity.displacement[i] = MainActivity.displacement[i]
+							/ (1.0f + (float) (MainActivity.sensitivity / 25.0f));
+				}
+				outFloatData[0] = MainActivity.rollAngle;
+				outFloatData[1] = MainActivity.pitchAngle;
+				outFloatData[2] = MainActivity.displacement[0];
+				outFloatData[3] = MainActivity.displacement[1];
+				outFloatData[4] = MainActivity.displacement[2];
+				outFloatData[5] = MainActivity.grip;
+				
+				if (MainActivity.displacement[0] != 0
+						|| MainActivity.displacement[1] != 0
+						|| MainActivity.displacement[2] != 0) {
+					Log.d("CHECK:", "x = " + MainActivity.displacement[0]
+							+ "; y = " + MainActivity.displacement[1] + "; z = "
+							+ MainActivity.displacement[2]);
+				}
+				
+				// add to accumulation of arm movements
+				for (int i = 0; i < 3; i++) {
+					MainActivity.armMovementTracker[i] +=  MainActivity.displacement[i];
+				}
+				MainActivity.armMovementTracker[3] +=  MainActivity.rollAngle;
+				MainActivity.armMovementTracker[4] +=  MainActivity.pitchAngle;
+	
+				MainActivity.displacement[0] = 0.0f;
+				MainActivity.displacement[1] = 0.0f;
+				MainActivity.displacement[2] = 0.0f;
+//				MainActivity.speed[0] = 0.0f;
+//				MainActivity.speed[1] = 0.0f;
+//				MainActivity.speed[2] = 0.0f;
+
+				MainActivity.rollAngle = 0;
+				MainActivity.pitchAngle = 0;
 			}
 			
-			// add to accumulation of arm movements
-			for (int i = 0; i < 3; i++) {
-				MainActivity.armMovementTracker[i] +=  MainActivity.displacement[i];
-			}
-			MainActivity.armMovementTracker[3] +=  MainActivity.rollAngle;
-			MainActivity.armMovementTracker[4] +=  MainActivity.pitchAngle;
-
-			MainActivity.displacement[0] = 0.0f;
-			MainActivity.displacement[1] = 0.0f;
-			MainActivity.displacement[2] = 0.0f;
-			MainActivity.rollAngle = 0;
-			MainActivity.pitchAngle = 0;
-			// MainActivity.speed[0] = 0.0f;
-			// MainActivity.speed[1] = 0.0f;
-			// MainActivity.speed[2] = 0.0f;
-
 			for (int i = 0; i < outFloatData.length; i++) {
 				int data = Float.floatToRawIntBits(outFloatData[i]);
 				byte outByteData[] = new byte[4];
