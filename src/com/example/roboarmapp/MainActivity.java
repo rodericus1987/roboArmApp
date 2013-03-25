@@ -121,6 +121,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static float previousRollAngle = 0;
 	public static float previousPitchAngle = 0;
 	public static float grip = 0.0f;
+	public static float previousGrip = 0.0f;
 	public static int sensitivity = 0;
 	
 	public static long[] sensorRestartTime;
@@ -368,26 +369,19 @@ public class MainActivity extends Activity implements SensorEventListener {
 			num_saves++;
 			// if both arm mode and wrist mode have been used, save the two movements as separate events
 			if ((armMovementTracker[0] != 0.0f) || (armMovementTracker[1] != 0.0f) || (armMovementTracker[2] != 0.0f)) {
-				arm_states.add(new relativeArmPosition(armMovementTracker[0], armMovementTracker[1], armMovementTracker[2], 0.0f, 0.0f, grip, num_saves));
+				arm_states.add(new relativeArmPosition(armMovementTracker[0], armMovementTracker[1], armMovementTracker[2], 0.0f, 0.0f, previousGrip, num_saves));
 				did_save = true;
 			}
 			
 			if ((armMovementTracker[3] != 0.0f) || (armMovementTracker[4] != 0.0f)) {
-				arm_states.add(new relativeArmPosition(0.0f, 0.0f, 0.0f, armMovementTracker[3], armMovementTracker[4], grip, num_saves));
+				arm_states.add(new relativeArmPosition(0.0f, 0.0f, 0.0f, armMovementTracker[3], armMovementTracker[4], previousGrip, num_saves));
 				did_save = true;
 			}
 			
-			if (!did_save) {
-				if (arm_states.size() > 0) {
-					relativeArmPosition temp_move_data = arm_states.getLast();
-					if (grip != temp_move_data.grip_pos) {
-						arm_states.add(new relativeArmPosition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, grip, num_saves));
-						did_save = true;
-					}
-				} else if (grip > 0) {
-					arm_states.add(new relativeArmPosition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, grip, num_saves));
-					did_save = true;
-				}
+			if (grip != previousGrip) {
+				arm_states.add(new relativeArmPosition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, grip, num_saves));
+				previousGrip = grip;
+				did_save = true;
 			}
 			
 			if (did_save) {
@@ -466,6 +460,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 								armMovementTracker[3] += temp_move_data.roll_pos;
 								armMovementTracker[4] += temp_move_data.pitch_pos;
 								
+								arm_states.removeLast();
+							}
+						}
+						
+						// gripper update
+						if (arm_states.size() > 0) {
+							temp_move_data = arm_states.getLast();
+							if (temp_move_data.save_count == save_id) {								
 								arm_states.removeLast();
 							}
 						}
@@ -655,12 +657,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 			while ((socketConnected) && (doPlayback)) {
 				
 				// temp for testing
-				try {
+				/*try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				}*/
 				
 				while (!playbackMoveDone) {
 					try {
@@ -727,6 +729,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			setMainButton_mainMode();
 			doPlayback = false;
 			grip = gripperBar.getProgress();
+			previousGrip = 0.0f;
 		}
 		
 	}
@@ -737,9 +740,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 			if (socketConnected) {
 				try {
 					int inVal = in.read();
-					if (inVal != -1) {
-						v1.vibrate(500);
+					if (inVal == 1) {
 						playbackMoveDone = true;
+					} else {
+						int dot = 200;
+						int dash = 500;
+						int short_gap = 100;
+						long[] pattern = { 0, dot, short_gap, dash };
+
+						// Only perform this pattern one time (-1 means "do not repeat")
+						v1.vibrate(pattern, -1);
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
