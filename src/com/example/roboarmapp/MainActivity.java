@@ -118,6 +118,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static float[] offset;
 	public static float rollAngle = 0;
 	public static float pitchAngle = 0;
+	public static float previousRollAngle = 0;
+	public static float previousPitchAngle = 0;
 	public static float grip = 0.0f;
 	public static int sensitivity = 0;
 	
@@ -256,9 +258,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 							synchronized (lock) {
 								rollAngle = 0;
 								pitchAngle = 0;
-								displacement[0] = 0.0f;
-								displacement[1] = 0.0f;
-								displacement[2] = 0.0f;
+								for (int i = 0; i < 3; i++) {
+									displacement[i] = 0.0f;
+								}
 							}
 							grip = -300; // home signal
 							gripperBar.setProgress(0);
@@ -880,6 +882,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 							previous_speed[i] = 0.0f;
 							previous_acceleration[i] = 0.0f;
 						}
+						previousRollAngle = 0.0f;
+						previousPitchAngle = 0.0f;
 					}
 
 					return true;
@@ -927,7 +931,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 				}
 				// Assume the device has been turning with same speed for the whole
 				// interval
-				if (!rollLocked) {
+				/*if (!rollLocked) {
 					roll = (float) (roll * timeInterval * NS2S);
 					rollAngle = rollAngle + roll;
 				}
@@ -935,7 +939,19 @@ public class MainActivity extends Activity implements SensorEventListener {
 				if (!pitchLocked) {
 					pitch = (float) (pitch * timeInterval * NS2S);
 					pitchAngle = pitchAngle + pitch;
+				}*/
+				
+				// Average previous speed and current speed
+				if (!rollLocked) {
+					rollAngle = rollAngle + ((float) (((roll + previousRollAngle) / 2.0f) * timeInterval * NS2S));
 				}
+	
+				if (!pitchLocked) {
+					pitchAngle = pitchAngle + ((float) (((pitch + previousPitchAngle) / 2.0f) * timeInterval * NS2S));
+				}
+				
+				previousRollAngle = roll;
+				previousPitchAngle = pitch;
 			}
 
 			// Log.d("CHECK: ", "The current roll value is " + rollAngle * 360 /
@@ -968,9 +984,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 				synchronized (lock) {
 				
 					boolean zeroSpeed = false;
-					for (int i = 0; i < 3; i++) {
+					/*for (int i = 0; i < 3; i++) {
 						
-						/*if (acceleration[i] > 0 && previous_acceleration[i] < 0) {
+						if (acceleration[i] > 0 && previous_acceleration[i] < 0) {
 							zeroSpeed = true;
 							//speed[i] = 0;
 						} else if (acceleration[i] < 0 && previous_acceleration[i] > 0) {
@@ -982,13 +998,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 							//acceleration[i] = 0.0f;
 							//speed[i] = 0.0f;
 							//sensorRestartTime[i] = event.timestamp + 10000000;
-						}*/
-						
-						previous_speed[i] = speed[i];
-						previous_acceleration[i] = acceleration[i];
-					}
+						}
+					}*/
 					
-					float speed_decay = (float)(0.3 * timeInterval * NS2S);
+					float speed_decay = (float)(0.2 * timeInterval * NS2S);
+					//float speed_decay = 0.0f;
 	
 					if ((!xAxisLocked) && (event.timestamp > sensorRestartTime[0])) {
 						speed[0] = (float) (((acceleration[0] + previous_acceleration[0]) / 2.0f) * timeInterval * NS2S)
@@ -1030,6 +1044,11 @@ public class MainActivity extends Activity implements SensorEventListener {
 						}
 						displacement[2] = (float) (((speed[2] + previous_speed[2]) / 2.0f) * timeInterval * NS2S)
 								+ displacement[2];
+					}
+					
+					for (int i = 0; i < 3; i++) {
+						previous_speed[i] = speed[i];
+						previous_acceleration[i] = acceleration[i];
 					}
 				}
 			}
