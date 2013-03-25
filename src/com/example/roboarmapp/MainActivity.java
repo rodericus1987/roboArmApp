@@ -970,7 +970,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					boolean zeroSpeed = false;
 					for (int i = 0; i < 3; i++) {
 						
-						if (acceleration[i] > 0 && previous_acceleration[i] < 0) {
+						/*if (acceleration[i] > 0 && previous_acceleration[i] < 0) {
 							zeroSpeed = true;
 							//speed[i] = 0;
 						} else if (acceleration[i] < 0 && previous_acceleration[i] > 0) {
@@ -982,15 +982,24 @@ public class MainActivity extends Activity implements SensorEventListener {
 							//acceleration[i] = 0.0f;
 							//speed[i] = 0.0f;
 							//sensorRestartTime[i] = event.timestamp + 10000000;
-						}
+						}*/
 						
 						previous_speed[i] = speed[i];
 						previous_acceleration[i] = acceleration[i];
 					}
+					
+					float speed_decay = (float)(0.3 * timeInterval * NS2S);
 	
 					if ((!xAxisLocked) && (event.timestamp > sensorRestartTime[0])) {
 						speed[0] = (float) (((acceleration[0] + previous_acceleration[0]) / 2.0f) * timeInterval * NS2S)
 								+ speed[0];
+						if (Math.abs(speed[0]) < speed_decay) {
+							speed[0] = 0;
+						} else if (speed[0] < 0) {
+							speed[0] += speed_decay;
+						} else {
+							speed[0] -= speed_decay;
+						}
 						displacement[0] = (float) (((speed[0] + previous_speed[0]) / 2.0f) * timeInterval * NS2S)
 								+ displacement[0];
 					}
@@ -998,6 +1007,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 					if ((!yAxisLocked) && (event.timestamp > sensorRestartTime[1])) {
 						speed[1] = (float) (((acceleration[1] + previous_acceleration[1]) / 2.0f) * timeInterval * NS2S)
 								+ speed[1];
+						if (Math.abs(speed[1]) < speed_decay) {
+							speed[1] = 0;
+						} else if (speed[1] < 0) {
+							speed[1] += speed_decay;
+						} else {
+							speed[1] -= speed_decay;
+						}
 						displacement[1] = (float) (((speed[1] + previous_speed[1]) / 2.0f) * timeInterval * NS2S)
 								+ displacement[1];
 					}
@@ -1005,6 +1021,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 					if ((!zAxisLocked) && (event.timestamp > sensorRestartTime[2])) {
 						speed[2] = (float) (((acceleration[2] + previous_acceleration[2]) / 2.0f) * timeInterval * NS2S)
 								+ speed[2];
+						if (Math.abs(speed[2]) < speed_decay) {
+							speed[2] = 0;
+						} else if (speed[2] < 0) {
+							speed[2] += speed_decay;
+						} else {
+							speed[2] -= speed_decay;
+						}
 						displacement[2] = (float) (((speed[2] + previous_speed[2]) / 2.0f) * timeInterval * NS2S)
 								+ displacement[2];
 					}
