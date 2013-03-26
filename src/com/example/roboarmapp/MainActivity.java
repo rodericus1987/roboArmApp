@@ -270,6 +270,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 							for (int i = 0; i < 5; i++) {
 								armMovementTracker[i] = 0.0f;
 							}
+							previousGrip = 0.0f;
 						}
 					}
 				};
@@ -417,14 +418,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 						relativeArmPosition temp_move_data;
 						
 						// reconstruct current position
-						for (int i = 0; i < arm_states.size(); i++) {
-							temp_move_data = arm_states.getLast();
+						while (arm_states.size() > 0) {
+							temp_move_data = arm_states.removeLast();
 							armMovementTracker[0] += temp_move_data.x_pos;
 							armMovementTracker[1] += temp_move_data.y_pos;
 							armMovementTracker[2] += temp_move_data.z_pos;
 							armMovementTracker[3] += temp_move_data.roll_pos;
 							armMovementTracker[4] += temp_move_data.pitch_pos;
-							arm_states.removeLast();
 						}
 						
 						//arm_states.clear();
@@ -519,13 +519,13 @@ public class MainActivity extends Activity implements SensorEventListener {
 			mRotation = mSensorManager
 					.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 			mSensorManager.registerListener(this, mAccelerometer,
-					SensorManager.SENSOR_DELAY_NORMAL);
+					SensorManager.SENSOR_DELAY_GAME);
 			//mSensorManager.registerListener(this, mOrientation,
 			//		SensorManager.SENSOR_DELAY_NORMAL);
 			mSensorManager.registerListener(this, mGyroscope,
-					SensorManager.SENSOR_DELAY_NORMAL);
+					SensorManager.SENSOR_DELAY_GAME);
 			mSensorManager.registerListener(this, mRotation,
-					SensorManager.SENSOR_DELAY_NORMAL);
+					SensorManager.SENSOR_DELAY_GAME);
 		}
 	}
 
@@ -639,6 +639,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		stopSensors();
 		myTimer.cancel();
 		myTimer.purge();
+		v1.cancel();
 		super.onPause();
 	}
 
@@ -673,7 +674,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					}
 				}
 				
-				if (stateIterator.hasNext()) {
+				if ((doPlayback) && (stateIterator.hasNext())) {
 					temp_arm_state = stateIterator.next();
 					synchronized (lock) {
 						displacement[0] = temp_arm_state.x_pos;
@@ -682,12 +683,12 @@ public class MainActivity extends Activity implements SensorEventListener {
 						rollAngle = temp_arm_state.roll_pos;
 						pitchAngle = temp_arm_state.pitch_pos;
 					}
+					gripperBar.setProgress((int)temp_arm_state.grip_pos);
 					grip = temp_arm_state.grip_pos;
+					playbackMoveDone = false;
 				} else {
 					doPlayback = false;
 				}
-				
-				//playbackMoveDone = false;
 			}
 			return null;
 		}
@@ -695,7 +696,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 		@Override
 		protected void onPreExecute() {
 			grip = -300; // home arm first
-			//playbackMoveDone = false;
+			gripperBar.setProgress(0);
+			playbackMoveDone = false;
 			myMainButton.setBackgroundColor(Color.RED);
 			myMainButton.setText(R.string.playback_text);
 			myMainButton.setOnTouchListener(new OnTouchListener() {
@@ -704,6 +706,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 					switch (event.getAction()) {
 					case MotionEvent.ACTION_DOWN: {
 						doPlayback = false;
+						playbackMoveDone = true;
 						myMainButton.setText("Canceling...");
 						myMainButton.setOnClickListener(null);
 						return true;
@@ -726,10 +729,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 						R.raw.playback_complete);
 				mp.start();
 			}
-			setMainButton_mainMode();
+			if (socketConnected) {
+				setMainButton_mainMode();
+			}
 			doPlayback = false;
 			grip = gripperBar.getProgress();
-			previousGrip = 0.0f;
+			//previousGrip = 0.0f;
+			
+			for (int i = 0; i < 5; i++) {
+				armMovementTracker[i] = 0.0f;
+			}
 		}
 		
 	}
@@ -740,14 +749,14 @@ public class MainActivity extends Activity implements SensorEventListener {
 			if (socketConnected) {
 				try {
 					int inVal = in.read();
-					if (inVal == 1) {
+					Log.d("inVal", "" + inVal);
+					if (inVal == 2) {
 						playbackMoveDone = true;
-					} else {
+					} else if (inVal != -1) {
 						int dot = 200;
 						int dash = 500;
 						int short_gap = 100;
 						long[] pattern = { 0, dot, short_gap, dash };
-
 						// Only perform this pattern one time (-1 means "do not repeat")
 						v1.vibrate(pattern, -1);
 					}
@@ -1011,7 +1020,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 						}
 					}*/
 					
-					float speed_decay = (float)(0.2 * timeInterval * NS2S);
+					float speed_decay = (float)(0.1 * timeInterval * NS2S);
 					//float speed_decay = 0.0f;
 	
 					if ((!xAxisLocked) && (event.timestamp > sensorRestartTime[0])) {
@@ -1196,9 +1205,11 @@ class doSendTimerTask extends TimerTask {
 			float[] outFloatData = new float[6];
 			synchronized (MainActivity.lock) {
 
-				for (int i = 0; i < 3; i++) {
-					MainActivity.displacement[i] = MainActivity.displacement[i]
-							/ (1.0f + (float) (MainActivity.sensitivity / 25.0f));
+				if (!MainActivity.doPlayback) {
+					for (int i = 0; i < 3; i++) {
+						MainActivity.displacement[i] = MainActivity.displacement[i]
+								/ (1.0f + (float) (MainActivity.sensitivity / 25.0f));
+					}
 				}
 				outFloatData[0] = MainActivity.rollAngle;
 				outFloatData[1] = MainActivity.pitchAngle;
@@ -1210,9 +1221,12 @@ class doSendTimerTask extends TimerTask {
 				if (MainActivity.displacement[0] != 0
 						|| MainActivity.displacement[1] != 0
 						|| MainActivity.displacement[2] != 0) {
-					Log.d("CHECK:", "x = " + MainActivity.displacement[0]
+					Log.d("Arm Mode:", "x = " + MainActivity.displacement[0]
 							+ "; y = " + MainActivity.displacement[1] + "; z = "
 							+ MainActivity.displacement[2]);
+				}
+				if (MainActivity.rollAngle != 0 || MainActivity.pitchAngle != 0) {
+					Log.d("Wrist Mode", "roll = " + MainActivity.rollAngle + "; pitch = " + MainActivity.pitchAngle + "; grip = " + MainActivity.grip);
 				}
 				
 				// add to accumulation of arm movements
@@ -1248,7 +1262,7 @@ class doSendTimerTask extends TimerTask {
 			}
 			try {
 				MainActivity.out.flush();
-				if ((gripSignalMode) && (!MainActivity.doPlayback)) {
+				if (gripSignalMode) {
 					MainActivity.grip = MainActivity.gripperBar.getProgress();
 				}
 			} catch (IOException e) {
