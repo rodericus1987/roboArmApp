@@ -26,7 +26,7 @@
             android:layout_height="35dp"
             android:layout_gravity="center_vertical"
             android:ems="10"
-            android:inputType="numberDecimal"
+            android:inputType="numberDecimal|textPhonetic"
             android:lines="1"
             android:singleLine="true"
             android:textColor="#FFFFFF" />
