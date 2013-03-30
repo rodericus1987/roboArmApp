@@ -51,6 +51,7 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity implements SensorEventListener {
 
+	// Axis Locks
 	public static boolean xAxisLocked;
 	public static boolean yAxisLocked;
 	public static boolean zAxisLocked;
@@ -61,48 +62,49 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static boolean zBoxChecked = false;
 	public static boolean rollBoxChecked = false;
 	public static boolean pitchBoxChecked = false;
+	public static boolean armMode;
+	
+	// Connection
 	public static String serverIP = "";
 	public static String serverPort = "4012";
 	public static Socket mySocket;
 	public static OutputStream out;
 	public static InputStream in;
 	public static boolean socketConnected = false;
-	public static Timer myTimer;
-	public static boolean doVibrate = true;
-	public static boolean doSound = true;
-	public Context context = this;
-	
-	private static LinkedList<relativeArmPosition> arm_states;
-
 	public static boolean connecting = true;
-	public static boolean tracking = false;
+	public static Timer myTimer;
+	public static String period = "1000"; // # of ms between tcp/ip data send
+	
+	// Sound and Vibration
+	public static boolean doVibrate = true;
+	private static Vibrator v1;
+	private static MediaPlayer mp = null;
+	public static boolean doSound = true;
+	
+	// Playback
+	public static int num_saves;
+	public static float[] armMovementTracker;
+	private static LinkedList<relativeArmPosition> arm_states;
+	public static boolean doPlayback;
+	public static boolean playbackMoveDone;
 
+	// Sensor flags
+	public static boolean tracking = false;
 	public static boolean sensorsStarted = false;
 	public static boolean reconnectButtonSet = false;
 	public static boolean serverSettingsChanged = false;
 
+	// UI
+	public Context context = this;
+	private static Context mainActivityContext;
 	public static SeekBar gripperBar;
 	public static Button myMainButton;
 	public static Button homeButton;
 	public static Button lockButton;
-	public static Switch modeSwitch;
-
-	public static String period = "1000"; // # of ms between tcp/ip data send
-	private static Vibrator v1;
-
-	private static Context mainActivityContext;
-	private static MediaPlayer mp = null;
-
-	public static boolean armMode;
-	
+	public static Switch modeSwitch;	
 	public static String lock = "lock";
 	
-	public static float[] armMovementTracker;
-	public static int num_saves;
-	public static boolean doPlayback;
-	public static boolean playbackMoveDone;
-
-	// Sensors
+	// Sensors and Data
 	private SensorManager mSensorManager;
 	private long lastMeasurement1, lastMeasurement2;
 	private Sensor mAccelerometer, mGyroscope, mRotation;
@@ -122,7 +124,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static float grip = 0.0f;
 	public static float previousGrip = 0.0f;
 	public static int sensitivity = 0;
-	
 	public static long[] sensorRestartTime;
 
 	@Override
