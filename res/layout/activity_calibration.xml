@@ -65,7 +65,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView5"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
-        android:text="x = 0; y = 0; z = 0" />
+        android:layout_marginTop="10dp"/>
 
 </RelativeLayout>

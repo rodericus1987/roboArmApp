@@ -1,8 +1,6 @@
 package com.example.roboarmapp;
 
-import android.R.drawable;
 import android.app.Activity;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;

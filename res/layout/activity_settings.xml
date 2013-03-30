@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="#000000"
         android:orientation="vertical"
         tools:context=".SettingsActivity" >
@@ -24,10 +24,11 @@
             android:id="@+id/editIP"
             android:layout_width="match_parent"
             android:layout_height="35dp"
-            android:singleLine="true"
-    		android:lines="1"
             android:layout_gravity="center_vertical"
             android:ems="10"
+            android:inputType="numberDecimal"
+            android:lines="1"
+            android:singleLine="true"
             android:textColor="#FFFFFF" />
 
         <View
@@ -48,10 +49,11 @@
             android:id="@+id/editPort"
             android:layout_width="match_parent"
             android:layout_height="35dp"
-            android:singleLine="true"
-    		android:lines="1"
             android:layout_gravity="center_vertical"
             android:ems="10"
+            android:inputType="number|numberDecimal"
+            android:lines="1"
+            android:singleLine="true"
             android:textColor="#FFFFFF" />
 
         <View
@@ -72,10 +74,11 @@
             android:id="@+id/editSendRate"
             android:layout_width="match_parent"
             android:layout_height="35dp"
-            android:singleLine="true"
-    		android:lines="1"
             android:layout_gravity="center_vertical"
             android:ems="10"
+            android:inputType="number"
+            android:lines="1"
+            android:singleLine="true"
             android:textColor="#FFFFFF" />
 
         <View

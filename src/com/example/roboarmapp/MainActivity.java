@@ -33,7 +33,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.sax.RootElement;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -106,7 +105,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	// Sensors
 	private SensorManager mSensorManager;
 	private long lastMeasurement1, lastMeasurement2;
-	private Sensor mAccelerometer, mOrientation, mGyroscope, mRotation;
+	private Sensor mAccelerometer, mGyroscope, mRotation;
 	private static final float NS2S = 1.0f / 1000000000.0f;
 	public static float[] rotationVector;
 	public static float[] rotationMatrix;
@@ -506,7 +505,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 		startActivity(intent);
 	}
 
-	@SuppressWarnings("deprecation")
 	public void startSensors() {
 		if (!sensorsStarted) {
 			sensorsStarted = true;
@@ -1001,24 +999,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 				Matrix.multiplyMV(acceleration, 0, rotationMatrix, 0, rawLinear, 0);
 				
 				synchronized (lock) {
-				
-					boolean zeroSpeed = false;
-					/*for (int i = 0; i < 3; i++) {
-						
-						if (acceleration[i] > 0 && previous_acceleration[i] < 0) {
-							zeroSpeed = true;
-							//speed[i] = 0;
-						} else if (acceleration[i] < 0 && previous_acceleration[i] > 0) {
-							zeroSpeed = true;
-							//speed[i] = 0;
-						}
-						
-						if (zeroSpeed) {
-							//acceleration[i] = 0.0f;
-							//speed[i] = 0.0f;
-							//sensorRestartTime[i] = event.timestamp + 10000000;
-						}
-					}*/
 					
 					float speed_decay = (float)(0.1 * timeInterval * NS2S);
 					//float speed_decay = 0.0f;
