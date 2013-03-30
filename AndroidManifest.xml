@@ -47,6 +47,7 @@
         <activity
             android:name="com.example.roboarmapp.Calibration"
             android:label="@string/title_activity_calibration"
+            android:screenOrientation="portrait"
             android:parentActivityName="com.example.roboarmapp.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

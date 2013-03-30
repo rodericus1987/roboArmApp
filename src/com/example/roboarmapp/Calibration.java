@@ -11,6 +11,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -47,13 +48,6 @@ public class Calibration extends Activity implements SensorEventListener {
 		TextView display_offset = (TextView) findViewById(R.id.textView6);
 		display_offset.setText("x = " + offset[0] + "; y = " + offset[1]
 				+ "; z = " + offset[2]);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity_calibration, menu);
-		return true;
 	}
 
 	@Override
@@ -123,7 +117,13 @@ public class Calibration extends Activity implements SensorEventListener {
 		protected void onPreExecute() {
 			startSensors();
 			pDialog = new ProgressDialog(context);
-			//pDialog.setCancelable(true);
+			pDialog.setCancelable(true);
+			pDialog.setOnCancelListener(new OnCancelListener(){
+				@Override
+				public void onCancel(DialogInterface arg0) {
+					stopSensors();
+				}				
+			});
 			pDialog.setTitle("Calibration in Process");
 			pDialog.setMessage("Calibrating... Please Wait.");
 			pDialog.show();
