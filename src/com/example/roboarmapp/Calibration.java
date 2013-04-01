@@ -61,7 +61,6 @@ public class Calibration extends Activity implements SensorEventListener {
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
 			finish();
-			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
