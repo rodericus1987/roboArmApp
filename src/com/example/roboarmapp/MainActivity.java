@@ -639,10 +639,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		}
 
 		if (serverIP.equals("")) {
-			gripperBar.setEnabled(false);
-			myMainButton.setBackgroundColor(Color.YELLOW);
-			myMainButton.setText(R.string.no_ip);
-			myMainButton.setOnTouchListener(null);
+			setMainButton_noIPMode();
 		} else if (!socketConnected) {
 			new ConnectToServer().execute();
 		}
@@ -854,9 +851,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 				}
 				gripperBar.setEnabled(false);
 				if (serverIP.equals("")) {
-					myMainButton.setBackgroundColor(Color.YELLOW);
-					myMainButton.setText(R.string.no_ip);
-					myMainButton.setOnTouchListener(null);
+					setMainButton_noIPMode();
 				} else {
 					reconnectButtonSet = false;
 				}
@@ -876,6 +871,35 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 			connecting = false;
 		}
+	}
+	
+	public void setMainButton_noIPMode() {
+		gripperBar.setEnabled(false);
+		myMainButton.setBackgroundColor(Color.YELLOW);
+		myMainButton.setText(R.string.no_ip);
+		if (doSound) {
+			if (mp != null) {
+				mp.release();
+			}
+			mp = MediaPlayer.create(getApplicationContext(),
+					R.raw.server_ip);
+			mp.start();
+		}
+		myMainButton.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_UP: {
+					Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+					startActivity(intent);
+					return true;
+				}
+				default:
+					return false;
+				}
+			}
+		});
+
 	}
 
 	public void setMainButton_mainMode() {

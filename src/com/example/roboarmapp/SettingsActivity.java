@@ -35,6 +35,7 @@ public class SettingsActivity extends Activity {
 		setContentView(R.layout.activity_settings);
 		ipAddress = (EditText)findViewById(R.id.editIP);
 		ipAddress.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+		
 		portText = (EditText)findViewById(R.id.editPort);
 		portText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
 		sendRateText = (EditText)findViewById(R.id.editSendRate);
