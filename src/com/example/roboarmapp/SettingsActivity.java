@@ -210,6 +210,7 @@ public class SettingsActivity extends Activity {
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
 			finish();
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}

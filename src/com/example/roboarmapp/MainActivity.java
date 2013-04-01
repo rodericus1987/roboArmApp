@@ -790,6 +790,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 					Log.d("inVal", "" + inVal);
 					if (inVal == 2) {
 						playbackMoveDone = true;
+						speed[0] = 0;
+						speed[1] = 0;
+						speed[2] = 0;
 					} else if (inVal != -1) {
 						int dot = 200;
 						int dash = 500;
@@ -1059,10 +1062,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 						event.values[2], 0 };
 				for (int i = 0; i < 3; i++) {
 					rawLinear[i] = rawLinear[i] - offset[i];
-					/*
-					 * if (rawLinear[i] < 0.2 && rawLinear[i] > -0.2) {
-					 * rawLinear[i] = 0; }
-					 */
+					
+					if (rawLinear[i] < 0.2 && rawLinear[i] > -0.2) {
+					rawLinear[i] = 0; }
+					 
 				}
 				float[] temp = new float[16];
 				rotationMatrix = new float[16];

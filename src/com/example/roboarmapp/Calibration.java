@@ -18,7 +18,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -61,6 +60,7 @@ public class Calibration extends Activity implements SensorEventListener {
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
 			finish();
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -80,7 +80,7 @@ public class Calibration extends Activity implements SensorEventListener {
 	public void StartCalibration(View view) {
 		counter = 0;
 		offset = new float[3];
-		new Calibrate().execute();
+		new Calibrate().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	@Override
