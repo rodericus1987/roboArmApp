@@ -100,33 +100,33 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#FFFFFF" />
 
-    <ImageView
+    <Button
         android:id="@+id/record"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignLeft="@+id/playback_text"
         android:layout_below="@+id/playback_text"
         android:onClick="recordState"
-        android:src="@drawable/record" />
+        android:background="@drawable/record" />
 
-    <ImageView
+    <Button
         android:id="@+id/play"
-        android:layout_width="85dp"
-        android:layout_height="85dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignTop="@+id/playback_text"
+        android:layout_marginTop="28dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="12dp"
         android:onClick="playbackStates"
-        android:src="@drawable/play_button" />
+        android:background="@drawable/play_button_2" />
 
-    <ImageView
+    <Button
         android:id="@+id/trash"
-        android:layout_width="52dp"
-        android:layout_height="52dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignRight="@+id/playback_text"
         android:layout_alignTop="@+id/record"
         android:layout_marginRight="3dp"
         android:onClick="trashState"
-        android:src="@drawable/trash" />
+        android:background="@drawable/trash" />
 
 </RelativeLayout>

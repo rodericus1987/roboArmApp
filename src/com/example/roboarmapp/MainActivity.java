@@ -101,6 +101,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public static Button myMainButton;
 	public static Button homeButton;
 	public static Button lockButton;
+	public static Button recordButton;
+	public static Button trashButton;
 	public static Switch modeSwitch;
 	public static String lock = "lock";
 
@@ -177,6 +179,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 		v1 = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 		gripperBar = (SeekBar) findViewById(R.id.gripperBar);
 		myMainButton = (Button) findViewById(R.id.startStopButton);
+		recordButton = (Button) findViewById(R.id.record);
+		trashButton = (Button) findViewById(R.id.trash);
 
 		// check for settings file
 		File fileTest = getFileStreamPath("settings.txt");
@@ -350,7 +354,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 							mp.start();
 						}
 						doPlayback = true;
-						new playbackMode().execute();
+						new playbackMode().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 					}
 				}
 			};
@@ -713,6 +717,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 			grip = -300; // home arm first
 			gripperBar.setProgress(0);
 			playbackMoveDone = false;
+			
+			// disable a bunch of buttons
+			homeButton.setEnabled(false);
+			lockButton.setEnabled(false);
+			gripperBar.setEnabled(false);
+			modeSwitch.setEnabled(false);
+			recordButton.setEnabled(false);
+			trashButton.setEnabled(false);
+			
 			myMainButton.setBackgroundColor(Color.RED);
 			myMainButton.setText(R.string.playback_text);
 			myMainButton.setOnTouchListener(new OnTouchListener() {
@@ -723,7 +736,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 						doPlayback = false;
 						playbackMoveDone = true;
 						myMainButton.setText("Canceling...");
-						myMainButton.setOnClickListener(null);
+						myMainButton.setOnTouchListener(null);
 						return true;
 					}
 					default:
@@ -737,6 +750,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 		protected void onPostExecute(Void result) {
 			Toast.makeText(getApplicationContext(), "Playback complete",
 					Toast.LENGTH_SHORT).show();
+			
+			// enable a bunch of buttons
+			homeButton.setEnabled(true);
+			lockButton.setEnabled(true);
+			gripperBar.setEnabled(true);
+			modeSwitch.setEnabled(true);
+			recordButton.setEnabled(true);
+			trashButton.setEnabled(true);
+			
 			if (doSound) {
 				if (mp != null) {
 					mp.release();
@@ -1144,26 +1166,28 @@ public class MainActivity extends Activity implements SensorEventListener {
 					MainActivity.disconnectFromServer();
 				}
 			}
+			
+			try {
+				out.flush();
+				out.close();
+				in.close();
+				mySocket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			if (doSound) {
+				if (mp != null) {
+					mp.release();
+				}
+				mp = MediaPlayer
+						.create(mainActivityContext, R.raw.arm_disconnected);
+				mp.start();
+			}
+			
 		} else if (connecting) {
 			connecting = false;
-		}
-
-		try {
-			out.flush();
-			out.close();
-			in.close();
-			mySocket.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (doSound) {
-			if (mp != null) {
-				mp.release();
-			}
-			mp = MediaPlayer
-					.create(mainActivityContext, R.raw.arm_disconnected);
-			mp.start();
 		}
 	}
 
