@@ -19,6 +19,7 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -44,8 +45,8 @@ public class Calibration extends Activity implements SensorEventListener {
 		offset = MainActivity.offset;
 
 		TextView display_offset = (TextView) findViewById(R.id.textView6);
-		display_offset.setText("x = " + offset[0] + "; y = " + offset[1]
-				+ "; z = " + offset[2]);
+		display_offset.setText("x = " + offset[0] + "\ny = " + offset[1]
+				+ "\nz = " + offset[2]);
 	}
 
 	@Override
@@ -59,7 +60,7 @@ public class Calibration extends Activity implements SensorEventListener {
 			//
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			//
-			NavUtils.navigateUpFromSameTask(this);
+			finish();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -95,6 +96,16 @@ public class Calibration extends Activity implements SensorEventListener {
 			offset[i] = (event.values[i] + offset[i] * counter) / (counter + 1);
 		}
 		counter++;
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event)
+	{
+	    if ((keyCode == KeyEvent.KEYCODE_BACK))
+	    {
+	        finish();
+	    }
+	    return super.onKeyDown(keyCode, event);
 	}
 
 	public class Calibrate extends AsyncTask<Void, Void, Void> {
@@ -137,8 +148,8 @@ public class Calibration extends Activity implements SensorEventListener {
 				public void onClick(DialogInterface dialog, int which) {
 					if (which == Dialog.BUTTON_POSITIVE) {
 						TextView display_offset = (TextView) findViewById(R.id.textView6);
-						display_offset.setText("x = " + offset[0] + "; y = " + offset[1]
-								+ "; z = " + offset[2]);
+						display_offset.setText("x = " + offset[0] + "\ny = " + offset[1]
+								+ "\nz = " + offset[2]);
 						File fileTest = getFileStreamPath("offsets.txt");
 						if (fileTest.exists()) {
 							fileTest.delete();

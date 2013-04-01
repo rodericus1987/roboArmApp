@@ -8,9 +8,6 @@
 package com.example.roboarmapp;
 
 public final class R {
-    public static final class array {
-        public static final int calibration_steps=0x7f060000;
-    }
     public static final class attr {
     }
     public static final class drawable {
@@ -36,45 +33,43 @@ public final class R {
         public static final int white_axis_dbl_gray=0x7f020013;
     }
     public static final class id {
-        public static final int axis=0x7f090008;
-        public static final int button1=0x7f090005;
-        public static final int doneButton=0x7f090009;
-        public static final int editIP=0x7f09001e;
-        public static final int editPort=0x7f09001f;
-        public static final int editSendRate=0x7f090020;
-        public static final int gripperBar=0x7f090017;
-        public static final int gripperClosed=0x7f090016;
-        public static final int gripperOpen=0x7f090015;
-        public static final int gripperText=0x7f090014;
-        public static final int homeButton=0x7f090019;
-        public static final int linearLayout1=0x7f090000;
-        public static final int lockButton=0x7f090018;
-        public static final int lockPitch=0x7f09000f;
-        public static final int lockRoll=0x7f09000d;
-        public static final int lockXAxis=0x7f090010;
-        public static final int lockYAxis=0x7f09000a;
-        public static final int lockZAxis=0x7f09000b;
-        public static final int lock_switch=0x7f090011;
-        public static final int main_switch=0x7f090013;
-        public static final int menu_settings=0x7f090026;
-        public static final int pitch=0x7f09000e;
-        public static final int play=0x7f09001c;
-        public static final int playback_text=0x7f09001a;
-        public static final int record=0x7f09001b;
-        public static final int roll=0x7f09000c;
-        public static final int sensitivity=0x7f090021;
-        public static final int sound=0x7f090025;
-        public static final int sound_text=0x7f090024;
-        public static final int startStopButton=0x7f090012;
-        public static final int textView1=0x7f090001;
-        public static final int textView2=0x7f090002;
-        public static final int textView3=0x7f090003;
-        public static final int textView4=0x7f090004;
-        public static final int textView5=0x7f090006;
-        public static final int textView6=0x7f090007;
-        public static final int trash=0x7f09001d;
-        public static final int vibration=0x7f090023;
-        public static final int vibration_text=0x7f090022;
+        public static final int axis=0x7f080006;
+        public static final int button1=0x7f080003;
+        public static final int doneButton=0x7f080007;
+        public static final int editIP=0x7f08001c;
+        public static final int editPort=0x7f08001d;
+        public static final int editSendRate=0x7f08001e;
+        public static final int gripperBar=0x7f080015;
+        public static final int gripperClosed=0x7f080014;
+        public static final int gripperOpen=0x7f080013;
+        public static final int gripperText=0x7f080012;
+        public static final int homeButton=0x7f080017;
+        public static final int linearLayout1=0x7f080000;
+        public static final int lockButton=0x7f080016;
+        public static final int lockPitch=0x7f08000d;
+        public static final int lockRoll=0x7f08000b;
+        public static final int lockXAxis=0x7f08000e;
+        public static final int lockYAxis=0x7f080008;
+        public static final int lockZAxis=0x7f080009;
+        public static final int lock_switch=0x7f08000f;
+        public static final int main_switch=0x7f080011;
+        public static final int menu_settings=0x7f080024;
+        public static final int pitch=0x7f08000c;
+        public static final int play=0x7f08001a;
+        public static final int playback_text=0x7f080018;
+        public static final int record=0x7f080019;
+        public static final int roll=0x7f08000a;
+        public static final int sensitivity=0x7f08001f;
+        public static final int sound=0x7f080023;
+        public static final int sound_text=0x7f080022;
+        public static final int startStopButton=0x7f080010;
+        public static final int textView1=0x7f080001;
+        public static final int textView2=0x7f080002;
+        public static final int textView5=0x7f080004;
+        public static final int textView6=0x7f080005;
+        public static final int trash=0x7f08001b;
+        public static final int vibration=0x7f080021;
+        public static final int vibration_text=0x7f080020;
     }
     public static final class layout {
         public static final int activity_calibration=0x7f030000;
@@ -84,10 +79,10 @@ public final class R {
         public static final int simple_spinner_item=0x7f030004;
     }
     public static final class menu {
-        public static final int activity_calibration=0x7f080000;
-        public static final int activity_lock_axis=0x7f080001;
-        public static final int activity_main=0x7f080002;
-        public static final int activity_settings=0x7f080003;
+        public static final int activity_calibration=0x7f070000;
+        public static final int activity_lock_axis=0x7f070001;
+        public static final int activity_main=0x7f070002;
+        public static final int activity_settings=0x7f070003;
     }
     public static final class raw {
         public static final int all_deleted=0x7f040000;
@@ -178,11 +173,11 @@ public final class R {
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f070000;
+        public static final int AppBaseTheme=0x7f060000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f070001;
-        public static final int SwitchText=0x7f070002;
+        public static final int AppTheme=0x7f060001;
+        public static final int SwitchText=0x7f060002;
     }
 }

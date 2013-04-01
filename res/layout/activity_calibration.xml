@@ -1,11 +1,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="#000000"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Calibration" >
 
     <LinearLayout
         android:id="@+id/linearLayout1"
+        android:background="#000000"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -16,51 +18,48 @@
 
         <TextView
             android:id="@+id/textView1"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/calibration_step1" />
 
         <TextView
             android:id="@+id/textView2"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/calibration_step2" />
-
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/calibration_step3" />
-
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/calibration_step4" />
+        
     </LinearLayout>
 
     <Button
         android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="250dp"
+        android:layout_height="70dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="80dp"
         android:onClick="StartCalibration"
+        android:textColor="#FFFFFF"
         android:text="@string/button_calibration" />
 
     <TextView
         android:id="@+id/textView5"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/linearLayout1"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"
-        android:text="@string/current_offset"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_marginTop="85dp"
+        android:text="@string/current_offset" />
 
     <TextView
         android:id="@+id/textView6"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView5"
