@@ -73,17 +73,19 @@ public final class R {
         public static final int vibration_text=0x7f080020;
     }
     public static final class layout {
-        public static final int activity_calibration=0x7f030000;
-        public static final int activity_lock_axis=0x7f030001;
-        public static final int activity_main=0x7f030002;
-        public static final int activity_settings=0x7f030003;
-        public static final int simple_spinner_item=0x7f030004;
+        public static final int activity_about=0x7f030000;
+        public static final int activity_calibration=0x7f030001;
+        public static final int activity_lock_axis=0x7f030002;
+        public static final int activity_main=0x7f030003;
+        public static final int activity_settings=0x7f030004;
+        public static final int simple_spinner_item=0x7f030005;
     }
     public static final class menu {
-        public static final int activity_calibration=0x7f070000;
-        public static final int activity_lock_axis=0x7f070001;
-        public static final int activity_main=0x7f070002;
-        public static final int activity_settings=0x7f070003;
+        public static final int activity_about=0x7f070000;
+        public static final int activity_calibration=0x7f070001;
+        public static final int activity_lock_axis=0x7f070002;
+        public static final int activity_main=0x7f070003;
+        public static final int activity_settings=0x7f070004;
     }
     public static final class raw {
         public static final int all_deleted=0x7f040000;
@@ -147,6 +149,7 @@ public final class R {
         public static final int setting_sound=0x7f05001b;
         public static final int setting_vibration=0x7f05001a;
         public static final int start_stop=0x7f050002;
+        public static final int title_activity_about=0x7f050031;
         public static final int title_activity_calibration=0x7f050027;
         public static final int title_activity_lock_axis=0x7f05000b;
         public static final int title_activity_settings=0x7f050015;

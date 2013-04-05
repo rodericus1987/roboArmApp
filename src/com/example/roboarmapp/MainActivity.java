@@ -582,6 +582,16 @@ public class MainActivity extends Activity implements SensorEventListener {
 						return true;
 					}
 				});
+		menu.add("About").setOnMenuItemClickListener(
+				new OnMenuItemClickListener() {
+
+					public boolean onMenuItemClick(MenuItem item) {
+						Intent intent = new Intent(context, AboutActivity.class);
+						startActivity(intent);
+
+						return true;
+					}
+				});
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
