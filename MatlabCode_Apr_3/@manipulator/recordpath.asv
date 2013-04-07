@@ -1,0 +1,40 @@
+function [t x] = recordpath(m,time,rate)
+% Recordpath
+%
+% Recordpath disables the robot arm servos and continuously samples the
+% servo positions while the user is free to trace a path with the arm. 
+%
+%
+% angles = getangles(m)
+% angles = getangles(m,mode)
+%
+% mode = 'radians' [default]
+% mode = 'degrees' degrees
+% mode = 'raw' raw counts [0,1023]
+%Record t seconds of motion of the robot arm
+%at a sampling rate of rate [Hz] default = 10
+%default time = 10 seconds
+
+if nargin < 3
+    rate = 10;
+end
+if nargin < 2
+    time = 10;
+end
+if nargin < 1
+    fprintf('Must provide robot object as input argument\n');
+    return
+end
+
+settorque(m,0); %Turn off motors before recording path
+
+n = time*rate;
+t = zeros(n,1);
+x = zeros(n,4);
+
+for i = 1:n
+    pause(1/rate);
+    t(i) = i/rate;
+    x(i,:) = getangles(m)';
+end
+end

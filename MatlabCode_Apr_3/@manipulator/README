@@ -1,0 +1,27 @@
+AX12A Matlab Library
+Feb, 2012.
+
+The AX-12 library is a Matlab class that encapsulates control of the robot arm. Help is available from 'help manipulator' within Matlab.
+
+Connecting the arm
+1) Download the ax-12 library from the course website and unzip in your home folder
+2) Start Matlab 2010a
+3) Connect the white usb on the desk to the usb port on the front card reader of a lab workstation
+4) Turn on the robot arm using the power switch on the front of the table
+5) Use the ax-12 library from the course website to control the arm
+    m = manipulator;
+    angles = getangles(m);
+
+Resetting the arm
+- The ax-12 arm no longer responds to commands
+- Some or all of the servos have flashing red leds
+1) Run the command 'close(m)'
+2) Power off the robot arm
+3) Wait ~15 seconds
+4) Power on the robot arm
+5) Reload the arm using 'm = manipulator' and continue work
+
+Shutting down the arm
+1) Run the command 'close(m)'
+2) Power off the arm
+3) Disconnect the usb cable
