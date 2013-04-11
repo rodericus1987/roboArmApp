@@ -69,6 +69,13 @@
 		     android:layout_height="wrap_content"
 		     android:text="@string/about_8" />
 	    
+	    <ImageView
+		     android:src="@drawable/arm_logo"
+		     android:layout_marginTop="20dp"
+		     android:layout_gravity="center_horizontal"
+		     android:layout_width="150dp"
+		     android:layout_height="150dp" />
+	    
 	    </LinearLayout>
 
 </ScrollView>
