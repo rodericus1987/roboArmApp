@@ -51,5 +51,13 @@
     <string name="save_offset_message">Do you wish to keep the results of this calibration?</string>
     <string name="save_offset_title">Save new offsets?</string>
     <string name="title_activity_about">About</string>
+    <string name="about_1"><b><u>Android Robotic Manipulator (A.R.M.)</u></b></string>
+    <string name="about_2">Version 1.0 (tested on Galaxy Nexus)\nClass project for ECE 1778\nUniversity of Toronto, Winter 2013\n</string>
+    <string name="about_3"><b><u>Original Concept and Development</u></b></string>
+    <string name="about_4">Paul Grouchy\nRené Rail-Ip\nHao Yan\n</string>
+    <string name="about_5"><b><u>Logo Design</u></b></string>
+    <string name="about_6">Sebastian Koever\n</string>
+    <string name="about_7"><b><u>Original Source Code</u></b></string>
+    <string name="about_8"><a href="https://github.com/rodericus1987/roboArmApp">https://github.com/rodericus1987/roboArmApp</a></string>
 
 </resources>

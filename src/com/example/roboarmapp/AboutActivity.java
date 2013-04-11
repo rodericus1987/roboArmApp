@@ -2,7 +2,9 @@ package com.example.roboarmapp;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 public class AboutActivity extends Activity {
 
@@ -12,6 +14,9 @@ public class AboutActivity extends Activity {
 		setContentView(R.layout.activity_about);
 		// Show the Up button in the action bar.
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		TextView t2 = (TextView) findViewById(R.id.code_link);
+	    t2.setMovementMethod(LinkMovementMethod.getInstance());
 	}
 
 	@Override
